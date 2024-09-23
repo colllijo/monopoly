@@ -1,0 +1,30 @@
+name: monopoly
+services:
+  web-service:
+    image: lighttpd
+  websocket-service:
+    build: ./backend/websocket-server/Dockerfile
+  rest-service:
+    build: ./backend/rest/Dockerfile
+  broker:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+  game-service:
+    build: ./backend/game/Dockerfile
+  data-service:
+    build: ./backend/data/Dockerfile
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: monopoly
+      POSTGRES_USER: pennybags
+      POSTGRES_PASSWORD: 131044f9-0b69-4031-aad4-197901fcdcde
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  postgres-data:
+  rabbitmq-data:
