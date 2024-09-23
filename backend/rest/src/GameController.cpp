@@ -3,6 +3,7 @@
 #include <crow/common.h>
 #include <crow/http_request.h>
 
+#include "communication/Command.hpp"
 #include "communication/CommunicationService.hpp"
 #include "crow/http_response.h"
 #include "nlohmann/json_fwd.hpp"
@@ -31,7 +32,9 @@ void GameController::registerRoutes()
 
 crow::response GameController::handleGetGames()
 {
-	nlohmann::json result = communication->execute(GetGamesCommand);
+	communication::commands::GetGames command;
+
+	nlohmann::json result = communication->execute(command);
 
 	crow::response res(result.dump());
 	res.add_header("Content-Type", "application/json");

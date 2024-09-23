@@ -22,4 +22,5 @@ add_subdirectory(${LIBRARY_DIR}/libuuid-cmake)
 add_subdirectory(communication)
 
 # Add services
+add_subdirectory(data)
 add_subdirectory(rest)

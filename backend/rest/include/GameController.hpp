@@ -5,7 +5,6 @@
 
 #include <memory>
 #include <string>
-#include "communication/Command.hpp"
 #include "communication/CommunicationService.hpp"
 
 class GameController
@@ -16,8 +15,6 @@ public:
 private:
 	std::shared_ptr<crow::SimpleApp> app;
 	std::shared_ptr<CommunicationService> communication;
-
-	constexpr static amqp::Command GetGamesCommand = {"get_games", amqp::CommandQueue::GAME};
 
 	// Method to register routes
 	void registerRoutes();

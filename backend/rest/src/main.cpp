@@ -11,7 +11,7 @@ int main() {
 	// Create Controllers
     GameController gameController(app, communicationService);
 
-	communicationService->start();
+	communicationService->start_async();
     app->port(8080).multithreaded().run();
 
 	communicationService->stop();
