@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <condition_variable>
 #include <map>
 #include <mutex>
@@ -18,8 +19,10 @@ public:
 
 	std::optional<V> get(const K& key)
 	{
+		auto timeout = std::chrono::seconds(3);
 		std::unique_lock<std::mutex> lock(exclusion);
-		conditional.wait(lock, [&] { return data.find(key) != data.end(); });
+		if (!conditional.wait_for(lock, timeout, [&] { return data.find(key) != data.end(); }) )
+			throw timeout_exception("Timeout while waiting for response");
 
 		auto it = data.find(key);
 		if (it != data.end())
@@ -31,6 +34,20 @@ public:
 
 		return std::nullopt;
 	}
+
+	class timeout_exception : public std::exception
+	{
+		public:
+			timeout_exception(const std::string& message) : message(message) {}
+
+			const char* what() const noexcept override
+			{
+				return message.c_str();
+			}
+
+		private:
+			std::string message;
+	};
 
 private:
 	std::map<K, V> data;

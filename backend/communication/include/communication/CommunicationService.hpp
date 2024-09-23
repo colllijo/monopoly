@@ -5,7 +5,6 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <string_view>
 #include <thread>
 #include <event2/event.h>
 
@@ -25,12 +24,16 @@ public:
 	using EventBasePtr = std::unique_ptr<struct event_base, std::function<void(struct event_base*)>>;
 	using EventPtr = std::unique_ptr<struct event, std::function<void(struct event*)>>;
 
+	using CommandCallback = std::function<nlohmann::json(communication::Command)>;
+
 	CommunicationService();
 
 	void start();
+	void start_async();
 	void stop();
 
-	nlohmann::json execute(const struct amqp::Command& command);
+	nlohmann::json execute(const struct communication::Command& command);
+	void handleCommand(const communication::Command &command, CommandCallback callback);
 
 private:
 	EventBasePtr base;
@@ -40,10 +43,14 @@ private:
 	std::unique_ptr<AMQP::TcpConnection> connection;
 	std::unique_ptr<AMQP::TcpChannel> channel;
 
-	std::unordered_set<std::string_view> requests;
+	std::unordered_set<std::string> requests;
 	ThreadSafeMap<std::string, nlohmann::json> responses;
+	std::map<communication::Command, CommandCallback> handlers;
+
+	void declareQueue(const std::string& name);
 
 	void onMessage(const AMQP::Message& message, uint64_t deliveryTag, bool redelivered);
+	void onCommand(communication::Command);
 
 	std::string createCorrelationId() const {
 		uuid_t uuid;

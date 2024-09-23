@@ -9,6 +9,7 @@
 #include <optional>
 #include <string>
 
+#include "Command.hpp"
 #include "nlohmann/json_fwd.hpp"
 
 CommunicationService::CommunicationService()
@@ -20,15 +21,48 @@ CommunicationService::CommunicationService()
 	channel = std::make_unique<AMQP::TcpChannel>(connection.get());
 
 	// Declare queues
-	channel->declareQueue("game_queue");
-	channel->declareQueue("data_queue");
-
-	std::cout << "Connected to RabbitMQ" << std::endl;
+	declareQueue("game_queue");
+	declareQueue("data_queue");
 };
+
+void CommunicationService::declareQueue(const std::string &queueName)
+{
+	channel->declareQueue(queueName, AMQP::durable).onSuccess([this, queueName](const std::string &name, int, int) {
+		channel->consume(name).onReceived([this](const AMQP::Message &message, uint64_t deliveryTag, bool) {
+			if (!message.hasReplyTo()) {
+				channel->reject(deliveryTag, AMQP::requeue);
+				return;
+			}
+
+			nlohmann::json json = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
+			communication::Command command = json;
+
+			if (!handlers.contains(command)) {
+				channel->reject(deliveryTag, AMQP::requeue);
+				return;
+			}
+
+			nlohmann::json response = handlers.at(command)(command);
+
+			AMQP::Envelope msg(response.dump().c_str(), response.dump().size());
+			msg.setCorrelationID(message.correlationID());
+
+			channel->ack(deliveryTag);
+			channel->startTransaction();
+			channel->publish("", message.replyTo(), msg);
+			
+			channel->commitTransaction();
+		});
+	});
+}
 
 void CommunicationService::start()
 {
-	communicationThread = std::thread([this]() { event_base_dispatch(base.get()); });
+	event_base_dispatch(base.get());
+}
+
+void CommunicationService::start_async() {
+	communicationThread = std::thread([this]() { start(); });
 }
 
 void CommunicationService::stop()
@@ -42,7 +76,12 @@ void CommunicationService::stop()
 	communicationThread.detach();
 }
 
-nlohmann::json CommunicationService::execute(const amqp::Command &command)
+void CommunicationService::handleCommand(const communication::Command &command, CommandCallback callback)
+{
+	handlers[command] = callback;
+}
+
+nlohmann::json CommunicationService::execute(const communication::Command &command)
 {
 	nlohmann::json json = command;
 	std::string payload = json.dump();
@@ -50,10 +89,10 @@ nlohmann::json CommunicationService::execute(const amqp::Command &command)
 	std::string queue;
 
 	switch (command.queue) {
-		case amqp::CommandQueue::GAME:
+		case communication::CommandQueue::GAME:
 			queue = "game_queue";
 			break;
-		case amqp::CommandQueue::DATA:
+		case communication::CommandQueue::DATA:
 			queue = "data_queue";
 			break;
 	}
