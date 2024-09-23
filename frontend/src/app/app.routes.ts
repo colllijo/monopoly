@@ -5,6 +5,6 @@ import {MonopolyComponent} from "./pages/monopoly/monopoly.component";
 export const routes: Routes = [
   { path: '', redirectTo: '/startseite', pathMatch: 'full' },
   { path: 'startseite', component: StartComponent, title: 'Startseite' },
-  { path: 'monopolyTest', component: MonopolyComponent, title: 'Startseite' }
+  { path: 'monopoly/:gameName', component: MonopolyComponent, title: 'Monopoly' }
 ]
 
