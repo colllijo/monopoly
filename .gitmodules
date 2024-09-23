@@ -13,3 +13,6 @@
 [submodule "backend/external/json"]
 	path = backend/external/json
 	url = git@github.com:nlohmann/json.git
+[submodule "backend/external/libuuid-cmake"]
+	path = backend/external/libuuid-cmake
+	url = git@github.com:gershnik/libuuid-cmake.git

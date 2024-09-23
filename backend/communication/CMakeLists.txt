@@ -36,4 +36,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   amqpcpp
   event
   nlohmann_json
+  uuid
 )

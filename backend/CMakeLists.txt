@@ -16,6 +16,7 @@ add_subdirectory(${LIBRARY_DIR}/Crow)
 add_subdirectory(${LIBRARY_DIR}/IXWebSocket)
 add_subdirectory(${LIBRARY_DIR}/json)
 add_subdirectory(${LIBRARY_DIR}/libevent)
+add_subdirectory(${LIBRARY_DIR}/libuuid-cmake)
 
 # Add communication library
 add_subdirectory(communication)
