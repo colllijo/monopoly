@@ -1,0 +1,15 @@
+[submodule "backend/external/AMQP-CPP"]
+	path = backend/external/AMQP-CPP
+	url = git@github.com:CopernicaMarketingSoftware/AMQP-CPP.git
+[submodule "backend/external/libevent"]
+	path = backend/external/libevent
+	url = git@github.com:libevent/libevent.git
+[submodule "backend/external/Crow"]
+	path = backend/external/Crow
+	url = git@github.com:CrowCpp/Crow.git
+[submodule "backend/external/IXWebSocket"]
+	path = backend/external/IXWebSocket
+	url = git@github.com:machinezone/IXWebSocket.git
+[submodule "backend/external/json"]
+	path = backend/external/json
+	url = git@github.com:nlohmann/json.git
