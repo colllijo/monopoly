@@ -11,6 +11,8 @@ set(INCLUDE_DIR "include")
 # Set header files
 set(HEADERS
   "${INCLUDE_DIR}/GameRepository.hpp"
+  "${INCLUDE_DIR}/Database.hpp"
+  "${INCLUDE_DIR}/Game.hpp"
 )
 
 # Set source files
@@ -24,4 +26,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PRIVATE
   nlohmann_json
   communication
+  pqxx
+  pq
 )

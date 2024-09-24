@@ -1,11 +1,18 @@
 #pragma once
 
-#include "communication/CommunicationService.hpp"
 #include <memory>
-class GameRepository {
-public:
-	GameRepository(std::shared_ptr<CommunicationService> communication);
+#include <pqxx/pqxx>
 
-	private:
+#include "communication/CommunicationService.hpp"
+
+class GameRepository
+{
+public:
+	GameRepository(std::shared_ptr<CommunicationService> communication, std::shared_ptr<pqxx::connection> dbConnection);
+private:
 	std::shared_ptr<CommunicationService> communication;
+	std::shared_ptr<pqxx::connection> dbConnection;
+
+	nlohmann::json getGames(const communication::Command);
+	nlohmann::json createGame(const communication::Command &command);
 };

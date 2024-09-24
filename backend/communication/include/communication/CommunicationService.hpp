@@ -39,6 +39,8 @@ private:
 	EventBasePtr base;
 	std::thread communicationThread;
 
+	bool async;
+
 	AMQP::LibEventHandler handler;
 	std::unique_ptr<AMQP::TcpConnection> connection;
 	std::unique_ptr<AMQP::TcpChannel> channel;

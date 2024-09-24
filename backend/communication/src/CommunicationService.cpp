@@ -13,7 +13,7 @@
 #include "nlohmann/json_fwd.hpp"
 
 CommunicationService::CommunicationService()
-    : base(event_base_new(), event_base_free), handler(AMQP::LibEventHandler(base.get()))
+    : base(event_base_new(), event_base_free), async(false), handler(AMQP::LibEventHandler(base.get()))
 {
 	if (!base) throw std::runtime_error("Failed to create event base");
 
@@ -34,17 +34,25 @@ void CommunicationService::declareQueue(const std::string &queueName)
 				return;
 			}
 
-			nlohmann::json json = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
-			communication::Command command = json;
+			communication::Command command;
+
+			try {
+				nlohmann::json json = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
+				command = json;
+			} catch (const nlohmann::json::parse_error &e) {
+				std::cerr << "Failed to parse message: " << e.what() << std::endl;
+				channel->reject(deliveryTag);
+				return;
+			}
 
 			if (!handlers.contains(command)) {
 				channel->reject(deliveryTag, AMQP::requeue);
 				return;
 			}
 
-			nlohmann::json response = handlers.at(command)(command);
+			std::string payload = (handlers.at(command)(command)).dump();
 
-			AMQP::Envelope msg(response.dump().c_str(), response.dump().size());
+			AMQP::Envelope msg(payload.c_str(), payload.size());
 			msg.setCorrelationID(message.correlationID());
 
 			channel->ack(deliveryTag);
@@ -62,6 +70,7 @@ void CommunicationService::start()
 }
 
 void CommunicationService::start_async() {
+	async = true;
 	communicationThread = std::thread([this]() { start(); });
 }
 
@@ -72,8 +81,10 @@ void CommunicationService::stop()
 
 	event_base_loopbreak(base.get());
 
-	if (communicationThread.joinable()) communicationThread.join();
-	communicationThread.detach();
+	if (async) {
+		if (communicationThread.joinable()) communicationThread.join();
+		else communicationThread.detach();
+	}
 }
 
 void CommunicationService::handleCommand(const communication::Command &command, CommandCallback callback)
@@ -131,6 +142,7 @@ void CommunicationService::onMessage(const AMQP::Message &message, uint64_t, boo
 		responses.put(message.correlationID(), nlohmann::json::parse(response));
 	} catch (const nlohmann::json::parse_error &e) {
 		std::cerr << "Failed to parse response for " << correlationId << ": " << e.what() << std::endl;
+		std::cerr << response << std::endl;
 		responses.put(message.correlationID(), nullptr);
 	}
 

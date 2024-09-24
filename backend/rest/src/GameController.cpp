@@ -42,7 +42,27 @@ crow::response GameController::handleGetGames()
 	return res;
 }
 
-crow::response GameController::handleCreateGame(const crow::request &req) { return crow::response(200); }
+crow::response GameController::handleCreateGame(const crow::request &req) {
+	nlohmann::json body;
+
+	try {
+		body = nlohmann::json::parse(req.body);
+	} catch (const nlohmann::json::parse_error &e) {
+		return crow::response(400);
+	}
+
+	if (!body.contains("name")) return crow::response(400);
+
+	communication::commands::CreateGame command;
+	command.data = nlohmann::json({ {"name", body["name"]} });
+
+	nlohmann::json result = communication->execute(command);
+
+	crow::response res(result.dump());
+	res.add_header("Content-Type", "application/json");
+
+	return res;
+}
 
 crow::response GameController::handleJoinGame(std::string gameId) { return crow::response(200); }
 
