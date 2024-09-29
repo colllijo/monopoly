@@ -1,21 +1,32 @@
 name: monopoly
 services:
-  web-service:
-    image: lighttpd
-  websocket-service:
-    build: ./backend/websocket-server/Dockerfile
+  # web-service:
+  #   image: lighttpd
+  # websocket-service:
+  #   build: ./backend/websocket/Dockerfile
   rest-service:
-    build: ./backend/rest/Dockerfile
+    depends_on:
+      - broker
+    build:
+      dockerfile: ../backend/rest/Dockerfile
+      context: ../backend/
+    ports:
+      - 8080:8080
   broker:
     image: rabbitmq:3-management
     ports:
       - "15672:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
-  game-service:
-    build: ./backend/game/Dockerfile
+  # game-service:
+  #   build: ./backend/game/Dockerfile
   data-service:
-    build: ./backend/data/Dockerfile
+    depends_on:
+      - db
+      - broker
+    build:
+      dockerfile: ../backend/data/Dockerfile
+      context: ../backend/
   db:
     image: postgres:16
     restart: always
