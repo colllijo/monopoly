@@ -11,6 +11,8 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 # Add external dependencies
 set(LIBRARY_DIR "external")
 
+option(BUILD_ONLY_DEPENDENCIES "Build only dependencies" OFF)
+
 set(AMQP-CPP_LINUX_TCP ON CACHE BOOL "Enable Linux TCP support for AMQP-CPP")
 add_subdirectory(${LIBRARY_DIR}/AMQP-CPP)
 
@@ -30,9 +32,11 @@ add_subdirectory(${LIBRARY_DIR}/libpqxx)
 add_subdirectory(${LIBRARY_DIR}/libuuid-cmake)
 add_subdirectory(${LIBRARY_DIR}/spdlog)
 
-# Add communication library
-add_subdirectory(communication)
+if(NOT BUILD_ONLY_DEPENDENCIES)
+  # Add communication library
+  add_subdirectory(communication)
 
-# Add services
-add_subdirectory(data)
-add_subdirectory(rest)
+  # Add services
+  add_subdirectory(data)
+  add_subdirectory(rest)
+endif()
