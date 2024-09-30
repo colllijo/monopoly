@@ -9,7 +9,7 @@
 int main() {
 	std::shared_ptr<SpdLogger> logger = std::make_shared<SpdLogger>();
 	std::shared_ptr<CommunicationService> communicationService = std::make_shared<CommunicationService>();
-	std::shared_ptr<pqxx::connection> dbConnection = std::make_shared<pqxx::connection>("postgresql://pennybags:131044f9-0b69-4031-aad4-197901fcdcde@localhost:5432/monopoly");
+	std::shared_ptr<pqxx::connection> dbConnection = createConnection();
 
 	communicationService->setLogger(logger);
 

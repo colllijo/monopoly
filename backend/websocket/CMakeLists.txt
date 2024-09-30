@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT_NAME "WebsocketService")
-set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
 
 set(SOURCE_DIR  "src")
@@ -26,3 +26,4 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PRIVATE ixwebsocket)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT_NAME "communication")
 set(LIBRARY_NAME "communication")
-set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 
 set(SOURCE_DIR  "src")
@@ -40,3 +40,4 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   uuid
   spdlog::spdlog
 )
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)

@@ -1,6 +1,14 @@
+#include <format>
 #include <memory>
 #include <pqxx/pqxx>
 #include "communication/NoOptLogger.hpp"
+
+static inline std::shared_ptr<pqxx::connection> createConnection() {
+    const char* database = std::getenv("DATABASE");
+    if (!database) database = "localhost";
+	
+	return std::make_shared<pqxx::connection>(std::format("postgresql://pennybags:131044f9-0b69-4031-aad4-197901fcdcde@{}:5432/monopoly", database));
+}
 
 static inline bool createSchema(std::shared_ptr<pqxx::connection> connection, std::shared_ptr<Logger> logger = std::make_shared<NoOptLogger>())
 {

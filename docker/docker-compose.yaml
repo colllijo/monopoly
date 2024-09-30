@@ -12,6 +12,8 @@ services:
       context: ../backend/
     ports:
       - 8080:8080
+    environment:
+      BROKER: broker
   broker:
     image: rabbitmq:3-management
     ports:
@@ -27,6 +29,9 @@ services:
     build:
       dockerfile: ../backend/data/Dockerfile
       context: ../backend/
+    environment:
+      BROKER: broker
+      DATABASE: db
   db:
     image: postgres:16
     restart: always

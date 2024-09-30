@@ -3,6 +3,8 @@
 #include <amqpcpp/flags.h>
 #include <amqpcpp/linux_tcp/tcpconnection.h>
 
+#include <exception>
+#include <format>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -10,13 +12,17 @@
 
 #include "Command.hpp"
 #include "Logger.hpp"
+#include "ThreadSafeMap.hpp"
 
 CommunicationService::CommunicationService(const std::shared_ptr<Logger> logger)
     : logger(logger), base(event_base_new(), event_base_free), async(false), handler(AMQP::LibEventHandler(base.get()))
 {
 	if (!base) throw std::runtime_error("Failed to create event base");
 
-	connection = std::make_unique<AMQP::TcpConnection>(&handler, AMQP::Address("amqp://guest:guest@localhost"));
+    const char* broker = std::getenv("BROKER");
+    if (!broker) broker = "localhost";
+	
+	connection = std::make_unique<AMQP::TcpConnection>(&handler, AMQP::Address(std::format("amqp://{}", broker)));
 	channel = std::make_unique<AMQP::TcpChannel>(connection.get());
 
 	// Declare queues
@@ -59,13 +65,14 @@ void CommunicationService::declareQueue(const std::string &queueName)
 			channel->publish("", message.replyTo(), msg);
 			
 			channel->commitTransaction();
-		});
+		}).onSuccess([this, queueName]() { logger->info("Listening on queue: {}", queueName); });
 	});
 }
 
 void CommunicationService::start()
 {
 	logger->info("CommunicationService started");
+	channel->onReady([this]() { logger->info("Connected to RabbitMQ broker"); });
 
 	event_base_dispatch(base.get());
 }
@@ -128,9 +135,13 @@ nlohmann::json CommunicationService::execute(const communication::Command &comma
 		                                                    std::placeholders::_3));
 	        });
 
-	std::optional<nlohmann::json> response = responses.get(correlationId);
+	try {
+		std::optional<nlohmann::json> response = responses.get(correlationId);
+		if (response.has_value()) return response.value();
+	} catch (const std::exception &e) {
+		logger->error("Failed to get response for {}: {}", correlationId, e.what());
+	}
 
-	if (response.has_value()) return response.value();
 	return nullptr;
 }
 
