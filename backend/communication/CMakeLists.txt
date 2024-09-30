@@ -14,6 +14,7 @@ set(HEADERS
   "${INCLUDE_DIR}/${LIBRARY_NAME}/CommunicationService.hpp"
   "${INCLUDE_DIR}/${LIBRARY_NAME}/ThreadSafeMap.hpp"
   "${INCLUDE_DIR}/${LIBRARY_NAME}/Command.hpp"
+  "${INCLUDE_DIR}/${LIBRARY_NAME}/Logger.hpp"
 )
 
 # Set source files
@@ -37,4 +38,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   event
   nlohmann_json
   uuid
+  spdlog::spdlog
 )

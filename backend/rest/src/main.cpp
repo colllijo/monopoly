@@ -1,21 +1,31 @@
 #include <crow.h>
+
 #include <memory>
 
+#include "CrowLogger.hpp"
 #include "GameController.hpp"
 #include "communication/CommunicationService.hpp"
+#include "communication/SpdLogger.hpp"
+#include "crow/logging.h"
 
-int main() {
-    std::shared_ptr<crow::SimpleApp> app = std::make_shared<crow::SimpleApp>();
+int main()
+{
+	std::shared_ptr<SpdLogger> logger = std::make_shared<SpdLogger>();
+	std::shared_ptr<crow::ILogHandler> crowLogger = std::make_shared<CrowLogger>(logger);
+	std::shared_ptr<crow::SimpleApp> app = std::make_shared<crow::SimpleApp>();
 	std::shared_ptr<CommunicationService> communicationService = std::make_shared<CommunicationService>();
 
-	// Create Controllers
-    GameController gameController(app, communicationService);
+	crow::logger::setHandler(crowLogger.get());
+	communicationService->setLogger(logger);
 
+	// Create Controllers
+	GameController gameController(app, communicationService);
+
+	logger->info("Starting the RestService");
 	communicationService->start_async();
-    app->port(8080).multithreaded().run();
+	app->port(8080).multithreaded().run();
 
 	communicationService->stop();
 
 	return 0;
 }
-

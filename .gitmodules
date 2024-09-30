@@ -19,3 +19,6 @@
 [submodule "backend/external/AMQP-CPP"]
 	path = backend/external/AMQP-CPP
 	url = git@github.com:CopernicaMarketingSoftware/AMQP-CPP.git
+[submodule "backend/external/spdlog"]
+	path = backend/external/spdlog
+	url = git@github.com:gabime/spdlog.git

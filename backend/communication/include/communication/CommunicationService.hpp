@@ -15,7 +15,9 @@
 #include <uuid/uuid.h>
 
 #include "Command.hpp"
+#include "Logger.hpp"
 #include "ThreadSafeMap.hpp"
+#include "communication/NoOptLogger.hpp"
 #include "nlohmann/json_fwd.hpp"
 
 class CommunicationService
@@ -26,7 +28,7 @@ public:
 
 	using CommandCallback = std::function<nlohmann::json(communication::Command)>;
 
-	CommunicationService();
+	CommunicationService(const std::shared_ptr<Logger> logger = std::make_shared<NoOptLogger>());
 
 	void start();
 	void start_async();
@@ -35,7 +37,13 @@ public:
 	nlohmann::json execute(const struct communication::Command& command);
 	void handleCommand(const communication::Command &command, CommandCallback callback);
 
+	void setLogger(const std::shared_ptr<Logger> logger) {
+		this->logger = logger;
+	}
+
 private:
+	std::shared_ptr<Logger> logger;
+
 	EventBasePtr base;
 	std::thread communicationThread;
 

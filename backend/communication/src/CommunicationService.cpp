@@ -4,16 +4,15 @@
 #include <amqpcpp/linux_tcp/tcpconnection.h>
 
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
 
 #include "Command.hpp"
-#include "nlohmann/json_fwd.hpp"
+#include "Logger.hpp"
 
-CommunicationService::CommunicationService()
-    : base(event_base_new(), event_base_free), async(false), handler(AMQP::LibEventHandler(base.get()))
+CommunicationService::CommunicationService(const std::shared_ptr<Logger> logger)
+    : logger(logger), base(event_base_new(), event_base_free), async(false), handler(AMQP::LibEventHandler(base.get()))
 {
 	if (!base) throw std::runtime_error("Failed to create event base");
 
@@ -40,7 +39,7 @@ void CommunicationService::declareQueue(const std::string &queueName)
 				nlohmann::json json = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
 				command = json;
 			} catch (const nlohmann::json::parse_error &e) {
-				std::cerr << "Failed to parse message: " << e.what() << std::endl;
+				logger->error("Failed to parse message: {}", e.what());
 				channel->reject(deliveryTag);
 				return;
 			}
@@ -66,6 +65,8 @@ void CommunicationService::declareQueue(const std::string &queueName)
 
 void CommunicationService::start()
 {
+	logger->info("CommunicationService started");
+
 	event_base_dispatch(base.get());
 }
 
@@ -85,6 +86,8 @@ void CommunicationService::stop()
 		if (communicationThread.joinable()) communicationThread.join();
 		else communicationThread.detach();
 	}
+
+	logger->info("CommunicationService stopped");
 }
 
 void CommunicationService::handleCommand(const communication::Command &command, CommandCallback callback)
@@ -141,8 +144,7 @@ void CommunicationService::onMessage(const AMQP::Message &message, uint64_t, boo
 	try {
 		responses.put(message.correlationID(), nlohmann::json::parse(response));
 	} catch (const nlohmann::json::parse_error &e) {
-		std::cerr << "Failed to parse response for " << correlationId << ": " << e.what() << std::endl;
-		std::cerr << response << std::endl;
+		logger->error("Failed to parse response for {}: {}", correlationId, e.what());
 		responses.put(message.correlationID(), nullptr);
 	}
 

@@ -1,8 +1,8 @@
-#include <iostream>
 #include <memory>
 #include <pqxx/pqxx>
+#include "communication/NoOptLogger.hpp"
 
-static inline void createSchema(std::shared_ptr<pqxx::connection> connection)
+static inline bool createSchema(std::shared_ptr<pqxx::connection> connection, std::shared_ptr<Logger> logger = std::make_shared<NoOptLogger>())
 {
 	try {
 		pqxx::work txn(*connection);
@@ -16,8 +16,11 @@ static inline void createSchema(std::shared_ptr<pqxx::connection> connection)
 		)");
 
 		txn.commit();
+
+		return true;
 	} catch (const pqxx::sql_error &e) {
-		std::cerr << "Failed to create schema: " << e.what() << std::endl;
-		throw;
+		logger->error("Failed to create schema: {}", e.what());
+
+		return false;
 	}
 }
