@@ -84,4 +84,16 @@ namespace communication
 		};  // namespace data
 	}  // namespace commands
 
+struct JoinGame : public communication::Command
+{
+	JoinGame() : Command("JoinGame", communication::CommandQueue::GAME, std::nullopt) {}
+	JoinGame(nlohmann::json data) : Command("JoinGame", communication::CommandQueue::GAME, data) {}
+};
+
+struct LeaveGame : public communication::Command
+{
+	LeaveGame() : Command("LeaveGame", communication::CommandQueue::GAME, std::nullopt) {}
+	LeaveGame(nlohmann::json data) : Command("LeaveGame", communication::CommandQueue::GAME, data) {}
+};
+}  // namespace command
 };  // namespace communication
