@@ -5,7 +5,6 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
-#include "nlohmann/json_fwd.hpp"
 
 namespace communication
 {
@@ -38,9 +37,9 @@ namespace communication
 	inline void to_json(nlohmann::json& j, const Command& cmd)
 	{
 		j = nlohmann::json{
-			{"command", cmd.command},
-			{"queue", cmd.queue},
-			{"data", cmd.data ? *cmd.data : nullptr},
+		    {"command", cmd.command},
+		    {"queue", cmd.queue},
+		    {"data", cmd.data ? *cmd.data : nullptr},
 		};
 	}
 
@@ -69,6 +68,18 @@ namespace communication
 			CreateGame(nlohmann::json data) : Command("CreateGame", communication::CommandQueue::GAME, data) {}
 		};
 
+		struct JoinGame : public communication::Command
+		{
+			JoinGame() : Command("JoinGame", communication::CommandQueue::GAME, std::nullopt) {}
+			JoinGame(nlohmann::json data) : Command("JoinGame", communication::CommandQueue::GAME, data) {}
+		};
+
+		struct LeaveGame : public communication::Command
+		{
+			LeaveGame() : Command("LeaveGame", communication::CommandQueue::GAME, std::nullopt) {}
+			LeaveGame(nlohmann::json data) : Command("LeaveGame", communication::CommandQueue::GAME, data) {}
+		};
+
 		namespace data
 		{
 			struct GetGames : public communication::Command
@@ -82,6 +93,5 @@ namespace communication
 				CreateGame(nlohmann::json data) : Command("DataCreateGame", communication::CommandQueue::DATA, data) {}
 			};
 		};  // namespace data
-	}  // namespace commands
-
+	};  // namespace commands
 };  // namespace communication
