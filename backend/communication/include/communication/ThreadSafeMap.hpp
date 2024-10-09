@@ -19,10 +19,11 @@ public:
 
 	std::optional<V> get(const K& key)
 	{
-		auto timeout = std::chrono::seconds(3);
+		// auto timeout = std::chrono::seconds(16);
 		std::unique_lock<std::mutex> lock(exclusion);
-		if (!conditional.wait_for(lock, timeout, [&] { return data.find(key) != data.end(); }) )
-			throw timeout_exception("Timeout while waiting for response");
+		// if (!conditional.wait_for(lock, timeout, [&] { return data.find(key) != data.end(); }) )
+		// 	throw timeout_exception("Timeout while waiting for response");
+		conditional.wait(lock, [&] { return data.find(key) != data.end(); });
 
 		auto it = data.find(key);
 		if (it != data.end())

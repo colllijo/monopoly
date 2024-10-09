@@ -6,20 +6,23 @@ namespace game
 {
 struct Game
 {
-	int id;
+	std::string uuid;
 	std::string name;
+	std::string state;
 
 	Game(const pqxx::row &row)
 	{
-		id = row["id"].as<int>();
+		uuid = row["uuid"].as<std::string>();
 		name = row["name"].as<std::string>();
+		state = row["state"].as<std::string>();
 	}
 
 	nlohmann::json toJson() const
 	{
 		return {
-			{"id", id},
-			{"name", name}
+			{"uuid", uuid},
+			{"name", name},
+			{"state", state}
 		};
 	}
 };

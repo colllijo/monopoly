@@ -5,13 +5,12 @@
 
 #include "communication/Command.hpp"
 #include "communication/CommunicationService.hpp"
+#include "communication/NoOptLogger.hpp"
 #include "crow/http_response.h"
 #include "nlohmann/json_fwd.hpp"
 
-GameController::GameController(
-	std::shared_ptr<crow::SimpleApp> app,
-	std::shared_ptr<CommunicationService> communication
-) : app(app), communication(communication)
+GameController::GameController(std::shared_ptr<crow::SimpleApp> app, std::shared_ptr<CommunicationService> communication)
+    : logger(NoOptLogger::getInstance()), app(app), communication(communication)
 {
 	registerRoutes();
 }
@@ -20,14 +19,11 @@ void GameController::registerRoutes()
 {
 	CROW_ROUTE((*app), "/games").methods(crow::HTTPMethod::GET)([this]() { return handleGetGames(); });
 
-	CROW_ROUTE((*app), "/games")
-	    .methods(crow::HTTPMethod::POST)([this](const crow::request &req) { return handleCreateGame(req); });
+	CROW_ROUTE((*app), "/games").methods(crow::HTTPMethod::POST)([this](const crow::request &req) { return handleCreateGame(req); });
 
-	CROW_ROUTE((*app), "/games/<string>")
-	    .methods(crow::HTTPMethod::POST)([this](std::string id) { return handleJoinGame(id); });
+	CROW_ROUTE((*app), "/games/<string>").methods(crow::HTTPMethod::POST)([this](std::string id) { return handleJoinGame(id); });
 
-	CROW_ROUTE((*app), "/games/<string>")
-	    .methods(crow::HTTPMethod::DELETE)([this](std::string id) { return handleLeaveGame(id); });
+	CROW_ROUTE((*app), "/games/<string>").methods(crow::HTTPMethod::DELETE)([this](std::string id) { return handleLeaveGame(id); });
 }
 
 crow::response GameController::handleGetGames()
@@ -42,19 +38,23 @@ crow::response GameController::handleGetGames()
 	return res;
 }
 
-crow::response GameController::handleCreateGame(const crow::request &req) {
+crow::response GameController::handleCreateGame(const crow::request &req)
+{
 	nlohmann::json body;
 
-	try {
+	try
+	{
 		body = nlohmann::json::parse(req.body);
-	} catch (const nlohmann::json::parse_error &e) {
+	}
+	catch (const nlohmann::json::parse_error &e)
+	{
 		return crow::response(400);
 	}
 
 	if (!body.contains("name")) return crow::response(400);
 
 	communication::commands::CreateGame command;
-	command.data = nlohmann::json({ {"name", body["name"]} });
+	command.data = nlohmann::json({{"name", body["name"]}});
 
 	nlohmann::json result = communication->execute(command);
 
@@ -64,6 +64,6 @@ crow::response GameController::handleCreateGame(const crow::request &req) {
 	return res;
 }
 
-crow::response GameController::handleJoinGame(std::string gameId) { return crow::response(200); }
+crow::response GameController::handleJoinGame(std::string) { return crow::response(200); }
 
-crow::response GameController::handleLeaveGame(std::string gameId) { return crow::response(200); }
+crow::response GameController::handleLeaveGame(std::string) { return crow::response(200); }

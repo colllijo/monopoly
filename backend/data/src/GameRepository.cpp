@@ -11,13 +11,13 @@
 #include "communication/NoOptLogger.hpp"
 
 GameRepository::GameRepository(std::shared_ptr<CommunicationService> communication, std::shared_ptr<pqxx::connection> dbConnection)
-    : logger(std::make_shared<NoOptLogger>()), communication(communication), dbConnection(dbConnection)
+    : logger(NoOptLogger::getInstance()), communication(communication), dbConnection(dbConnection)
 {
-	communication->handleCommand(communication::commands::GetGames(), std::bind(&GameRepository::getGames, this, std::placeholders::_1));
-	communication->handleCommand(communication::commands::CreateGame(), std::bind(&GameRepository::createGame, this, std::placeholders::_1));
+	communication->handleCommand(communication::commands::data::GetGames(), std::bind(&GameRepository::getGames, this, std::placeholders::_1));
+	communication->handleCommand(communication::commands::data::CreateGame(), std::bind(&GameRepository::createGame, this, std::placeholders::_1));
 }
 
-nlohmann::json GameRepository::getGames(const communication::Command)
+CommandResult GameRepository::getGames(const Command&)
 {
 	pqxx::result result;
 
@@ -28,41 +28,46 @@ nlohmann::json GameRepository::getGames(const communication::Command)
 
 		txn.commit();
 	} catch (const pqxx::sql_error &e) {
-		return nlohmann::json();
+		logger->error("Failed to get games: {}", e.what());
+		return CommandResult();
 	}
 
-	nlohmann::json data = nlohmann::json::array();
+	CommandResult data = nlohmann::json::array();
 	for (const pqxx::row &row : result)
 		data.push_back(game::Game(row).toJson());
 
 	return data;
 }
 
-nlohmann::json GameRepository::createGame(const communication::Command &command)
+CommandResult GameRepository::createGame(const Command &command)
 {
-	if (!command.data.has_value() || !command.data->contains("name"))
-		return nlohmann::json();
+	if (
+		!command.data.has_value()
+		|| !command.data->contains("name")
+	) return CommandResult();
 
 	std::string name = command.data->value("name", "");
+	std::string user = command.data->value("user", "");
+
 	pqxx::result result;
 
 	try {
 		pqxx::work txn(*dbConnection);
 
-		txn.exec(
-			R"(INSERT INTO games (name) VALUES ($1))",
-			pqxx::params{name}
-		);
-
 		result = txn.exec(
-			R"(SELECT * FROM games WHERE name = $1 LIMIT 1)",
+			R"(
+				INSERT INTO games (name) VALUES ($1)
+				RETURNING *
+			)",
 			pqxx::params{name}
 		);
 
 		txn.commit();
+		
+		logger->info("Created game: {}", name);
 	} catch (const pqxx::sql_error &e) {
 		logger->error("Failed to create game: {}", e.what());
-		return nlohmann::json();
+		return CommandResult();
 	}
 
 	return game::Game(result[0]).toJson();

@@ -39,4 +39,5 @@ if(NOT BUILD_ONLY_DEPENDENCIES)
   # Add services
   add_subdirectory(data)
   add_subdirectory(rest)
+  add_subdirectory(game)
 endif()

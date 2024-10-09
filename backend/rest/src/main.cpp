@@ -20,6 +20,7 @@ int main()
 
 	// Create Controllers
 	GameController gameController(app, communicationService);
+	gameController.setLogger(logger);
 
 	logger->info("Starting the RestService");
 	communicationService->start_async();

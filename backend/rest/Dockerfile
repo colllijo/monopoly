@@ -14,11 +14,11 @@ WORKDIR /src
 COPY ./CMakeLists.txt ./CMakeLists.txt
 COPY ./external ./external
 
-RUN cmake -S . -B build -DBUILD_ONLY_DEPENDENCIES=ON \
-    && cd build \
-    && make
-
-RUN rm build/CMakeCache.txt
+# RUN cmake -S . -B build -DBUILD_ONLY_DEPENDENCIES=ON \
+#     && cd build \
+#     && make
+#
+# RUN rm build/CMakeCache.txt
 
 # Copy and build the application
 

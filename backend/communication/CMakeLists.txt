@@ -11,6 +11,7 @@ set(INCLUDE_DIR "include")
 
 # Set header files
 set(HEADERS
+  "${INCLUDE_DIR}/${LIBRARY_NAME}/AsyncEventQueue.hpp"
   "${INCLUDE_DIR}/${LIBRARY_NAME}/CommunicationService.hpp"
   "${INCLUDE_DIR}/${LIBRARY_NAME}/ThreadSafeMap.hpp"
   "${INCLUDE_DIR}/${LIBRARY_NAME}/Command.hpp"
