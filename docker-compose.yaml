@@ -5,11 +5,12 @@ services:
   # websocket-service:
   #   build: ./backend/websocket/Dockerfile
   rest-service:
+    restart: on-failure
     depends_on:
       - broker
     build:
-      dockerfile: ../backend/rest/Dockerfile
-      context: ../backend/
+      dockerfile: ./rest/Dockerfile
+      context: ./backend/
     ports:
       - 8080:8080
     environment:
@@ -20,15 +21,23 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
-  # game-service:
-  #   build: ./backend/game/Dockerfile
+  game-service:
+    restart: on-failure
+    depends_on:
+      - broker
+    build:
+      dockerfile: ./game/Dockerfile
+      context: ./backend/
+    environment:
+      BROKER: broker
   data-service:
+    restart: on-failure
     depends_on:
       - db
       - broker
     build:
-      dockerfile: ../backend/data/Dockerfile
-      context: ../backend/
+      dockerfile: ./data/Dockerfile
+      context: ./backend/
     environment:
       BROKER: broker
       DATABASE: db
