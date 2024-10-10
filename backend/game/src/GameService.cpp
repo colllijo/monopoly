@@ -5,8 +5,8 @@
 
 GameService::GameService(std::shared_ptr<CommunicationService> communication) : logger(NoOptLogger::getInstance()), communication(communication)
 {
-	communication->handleCommand(communication::commands::GetGames(), std::bind(&GameService::getGames, this, std::placeholders::_1));
-	communication->handleCommand(communication::commands::CreateGame(), std::bind(&GameService::createGame, this, std::placeholders::_1));
+	communication->registerCommandHandler(communication::commands::GetGames(), std::bind(&GameService::getGames, this, std::placeholders::_1));
+	communication->registerCommandHandler(communication::commands::CreateGame(), std::bind(&GameService::createGame, this, std::placeholders::_1));
 }
 
 CommandResult GameService::getGames(const communication::Command&)

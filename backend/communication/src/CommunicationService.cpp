@@ -1,14 +1,15 @@
 #include "CommunicationService.hpp"
-#include <amqpcpp/flags.h>
-#include "Command.hpp"
+
+#include <chrono>
+#include <mutex>
 
 CommunicationService::CommunicationService(const std::shared_ptr<Logger> logger)
     : logger(logger),
-	base(event_base_new(), event_base_free),
-	async(false),
-	handler(AMQP::LibEventHandler(base.get())),
-	commandQueue(std::bind(&CommunicationService::handleWork, this, std::placeholders::_1)),
-	messageQueue(std::bind(&CommunicationService::handleMessage, this, std::placeholders::_1))
+      base(event_base_new(), event_base_free),
+      async(false),
+      handler(AMQP::LibEventHandler(base.get())),
+      commandQueue(std::bind(&CommunicationService::handleCommand, this, std::placeholders::_1)),
+      messageQueue(std::bind(&CommunicationService::handleMessage, this, std::placeholders::_1))
 {
 	if (!base) throw std::runtime_error("Failed to create event base");
 
@@ -31,34 +32,50 @@ void CommunicationService::declareQueue(const std::string_view &queueName)
 	        [this, queueName](const std::string &name, int, int)
 	        {
 		        channel->consume(name)
-		            .onReceived([this](const AMQP::Message& message, uint64_t deliveryTag, bool){
-						// Check if the message is valid
-						if (!message.hasReplyTo() || !message.hasCorrelationID())
-						{
-							channel->ack(deliveryTag);
-							return;
-						}
+		            .onReceived(
+		                [this](const AMQP::Message &message, uint64_t deliveryTag, bool)
+		                {
+			                // Check if the message is valid
+			                if (!message.hasReplyTo() || !message.hasCorrelationID())
+			                {
+				                channel->ack(deliveryTag);
+				                return;
+			                }
 
-						// Parse the command
-						Command command;
-						try { command = nlohmann::json::parse(std::string(message.body(), message.bodySize())); }
-						catch (const std::exception &e)
-						{
-							channel->ack(deliveryTag);
-							return;
-						}
+			                // Parse the command
+			                Command command;
+			                try
+			                {
+				                command = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
+			                }
+			                catch (const std::exception &e)
+			                {
+				                channel->ack(deliveryTag);
+				                return;
+			                }
 
-						// Check if the command is registered
-						if (!handlers.contains(command))
-						{
-							channel->reject(deliveryTag, AMQP::requeue);
-							return;
-						}
+							// Check if command is expired
+							std::unique_lock<std::mutex> lock(requestsMutex);
+							if (expired.contains(message.correlationID()))
+							{
+								channel->ack(deliveryTag);
+								expired.erase(message.correlationID());
+								lock.unlock();
+								return;
+							}
+							lock.unlock();
 
-						channel->ack(deliveryTag);
-						logger->info("Received command: {}", command.command);
-						commandQueue.push({ command, message.correlationID(), message.replyTo(), deliveryTag });
-					})
+			                // Check if the command is registered
+			                if (!handlers.contains(command))
+			                {
+				                channel->reject(deliveryTag, AMQP::requeue);
+				                return;
+			                }
+
+			                channel->ack(deliveryTag);
+			                logger->info("Received command: {}", command.command);
+			                commandQueue.push({command, message.correlationID(), message.replyTo(), deliveryTag});
+		                })
 		            .onSuccess([this, queueName]() { logger->info("Listening on queue: {}", queueName); })
 		            .onError([this, queueName](const char *message) { logger->error("Failed to consume from queue {}: {}", queueName, message); });
 	        });
@@ -67,25 +84,35 @@ void CommunicationService::declareQueue(const std::string_view &queueName)
 void CommunicationService::declareResponseQueue()
 {
 	channel->declareQueue(AMQP::exclusive)
-	    .onSuccess([this](const std::string &name, int, int) {
-			responseQueue = name;
-			logger->info("Created exclusive queue: {}", name);
-			channel->consume(name, AMQP::noack)
-				.onReceived([this](const AMQP::Message& message, uint64_t deliveryTag, bool){
-					// Check if the message is valid
-					if (!message.hasCorrelationID()) return;
+	    .onSuccess(
+	        [this](const std::string &name, int, int)
+	        {
+		        responseQueue = name;
+		        logger->info("Created exclusive queue: {}", name);
+		        channel->consume(name, AMQP::noack)
+		            .onReceived(
+		                [this](const AMQP::Message &message, uint64_t deliveryTag, bool)
+		                {
+			                // Check if the message is valid
+			                if (!message.hasCorrelationID()) return;
 
-					// Parse the message
-					CommandResult result;
-					try { result = nlohmann::json::parse(std::string(message.body(), message.bodySize())); }
-					catch (const std::exception &e) { return; }
+			                // Parse the message
+			                CommandResult result;
+			                try
+			                {
+				                result = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
+			                }
+			                catch (const std::exception &e)
+			                {
+				                return;
+			                }
 
-					logger->info("Received message: {}", result.dump());
-					messageQueue.push({ std::string(message.body(), message.bodySize()), message.correlationID(), deliveryTag });
-				})
-				.onSuccess([this, name]() { logger->info("Listening on exclusive queue: {}", name); })
-				.onError([this](const char *message) { logger->error("Failed to consume from exclusive queue: {}", message); });
-		})
+			                logger->info("Received message: {}", result.dump());
+			                messageQueue.push({std::string(message.body(), message.bodySize()), message.correlationID(), deliveryTag});
+		                })
+		            .onSuccess([this, name]() { logger->info("Listening on exclusive queue: {}", name); })
+		            .onError([this](const char *message) { logger->error("Failed to consume from exclusive queue: {}", message); });
+	        })
 	    .onError([this](const char *message) { logger->error("Failed to create exclusive queue: {}", message); });
 }
 
@@ -115,7 +142,7 @@ void CommunicationService::stop()
 	logger->info("CommunicationService stopped");
 }
 
-void CommunicationService::handleCommand(const Command &command, CommandCallback callback) { handlers[command] = callback; }
+void CommunicationService::registerCommandHandler(const Command &command, CommandCallback callback) { handlers[command] = callback; }
 
 CommandResult CommunicationService::execute(const Command &command)
 {
@@ -137,10 +164,23 @@ CommandResult CommunicationService::execute(const Command &command)
 
 	channel->publish("", communication::getQueuenName(command.queue), msg);
 
-	return future.get();
+	if (future.wait_for(std::chrono::seconds(8)) == std::future_status::ready) return future.get();
+
+	logger->info("Command timed out: {}", command.command);
+	removeCommand(correlationId);
+	return nullptr;
 }
 
-void CommunicationService::handleWork(const CommandData& data)
+void CommunicationService::removeCommand(const std::string &correlationId)
+{
+	std::unique_lock<std::mutex> lock(requestsMutex);
+	requests.erase(correlationId);
+	expired.insert(correlationId);
+
+	lock.unlock();
+}
+
+void CommunicationService::handleCommand(const CommandData &data)
 {
 	if (!handlers.contains(data.command)) return;
 	std::string payload = (handlers.at(data.command)(data.command)).dump();
@@ -151,14 +191,18 @@ void CommunicationService::handleWork(const CommandData& data)
 	channel->publish("", data.replyTo, response);
 }
 
-void CommunicationService::handleMessage(const MessageData& data)
+void CommunicationService::handleMessage(const MessageData &data)
 {
 	if (!requests.contains(data.correlationId)) return;
 
+	std::unique_lock<std::mutex> lock(requestsMutex);
 	std::shared_ptr<std::promise<CommandResult>> promise = std::move(requests.at(data.correlationId));
 	std::string response(data.message);
 
-	try { promise->set_value(nlohmann::json::parse(response)); }
+	try
+	{
+		promise->set_value(nlohmann::json::parse(response));
+	}
 	catch (const nlohmann::json::parse_error &e)
 	{
 		logger->error("Failed to parse response for {}: {}", data.correlationId, e.what());
@@ -166,4 +210,5 @@ void CommunicationService::handleMessage(const MessageData& data)
 	}
 
 	requests.erase(data.correlationId);
+	lock.unlock();
 }

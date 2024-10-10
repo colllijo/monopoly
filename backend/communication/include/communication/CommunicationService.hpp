@@ -15,6 +15,7 @@
 #include <string_view>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "AsyncEventQueue.hpp"
 #include "Command.hpp"
@@ -56,7 +57,7 @@ public:
 	void stop();
 
 	CommandResult execute(const struct communication::Command& command);
-	void handleCommand(const communication::Command& command, CommandCallback callback);
+	void registerCommandHandler(const communication::Command& command, CommandCallback callback);
 
 	void setLogger(const std::shared_ptr<Logger> logger) { this->logger = logger; }
 
@@ -75,6 +76,7 @@ private:
 
 	std::map<communication::Command, CommandCallback> handlers;
 	std::unordered_map<std::string, std::shared_ptr<CommandPromise>> requests;
+	std::unordered_set<std::string> expired;
 	std::mutex requestsMutex;
 
 	AsyncEventQueue<CommandData> commandQueue;
@@ -83,8 +85,10 @@ private:
 	void declareQueue(const std::string_view& name);
 	void declareResponseQueue();
 
-	void handleWork(const CommandData& data);
+	void handleCommand(const CommandData& data);
 	void handleMessage(const MessageData& data);
+
+	void removeCommand(const std::string& correlationId);
 
 	std::string createCorrelationId() const
 	{
