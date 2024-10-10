@@ -24,7 +24,19 @@ CommandResult GameRepository::getGames(const Command&)
 	try {
 		pqxx::work txn(*dbConnection);
 
-		result = txn.exec("SELECT * FROM games");
+		result = txn.exec(R"(
+			SELECT 
+				games.uuid, 
+				games.name, 
+				games.state, 
+				COUNT(game_players.player_id) AS players
+			FROM 
+				games
+			LEFT JOIN 
+				game_players ON games.id = game_players.game_id
+			GROUP BY 
+				games.uuid, games.name, games.state
+		)");
 
 		txn.commit();
 	} catch (const pqxx::sql_error &e) {
@@ -49,26 +61,39 @@ CommandResult GameRepository::createGame(const Command &command)
 	std::string name = command.data->value("name", "");
 	std::string user = command.data->value("user", "");
 
-	pqxx::result result;
-
 	try {
 		pqxx::work txn(*dbConnection);
 
-		result = txn.exec(
+		auto player = txn.exec(
 			R"(
-				INSERT INTO games (name) VALUES ($1)
+				INSERT INTO players (name) VALUES ($1)
 				RETURNING *
 			)",
+			pqxx::params{user}
+		);
+
+		auto game = txn.exec(
+			R"(
+				INSERT INTO games (name) VALUES ($1)
+				RETURNING games.id, games.uuid, games.name, games.state, 1 AS players
+			)",
 			pqxx::params{name}
+		);
+
+		txn.exec(
+			R"(
+				INSERT INTO game_players (game_id, player_id, hosting) VALUES ($1, $2, TRUE)
+			)",
+			pqxx::params{game[0]["id"].as<int>(), player[0]["id"].as<int>()}
 		);
 
 		txn.commit();
 		
 		logger->info("Created game: {}", name);
+		return game::Game(game[0]).toJson();
 	} catch (const pqxx::sql_error &e) {
 		logger->error("Failed to create game: {}", e.what());
-		return CommandResult();
 	}
 
-	return game::Game(result[0]).toJson();
+	return CommandResult();
 }
