@@ -7,23 +7,21 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
 
 set(SOURCE_DIR  "src")
 set(INCLUDE_DIR "include")
-set(LIBRARY_DIR "../external")
 
 # Set header files
 set(HEADERS
+  "${INCLUDE_DIR}/Server.hpp"
 )
 
 # Set source files
 set(SOURCES
   "${SOURCE_DIR}/main.cpp"
+  "${SOURCE_DIR}/Server.cpp"
 )
-
-# Add libraries
-add_subdirectory(${LIBRARY_DIR}/IXWebSocket)
 
 project(${PROJECT_NAME})
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} PRIVATE ixwebsocket)
+target_link_libraries(${PROJECT_NAME} PRIVATE ixwebsocket nlohmann_json communication)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
