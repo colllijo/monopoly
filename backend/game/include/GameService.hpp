@@ -10,6 +10,8 @@
 using communication::Command;
 using communication::CommandResult;
 
+using namespace communication::commands;
+
 class GameService
 {
 public:
@@ -21,4 +23,6 @@ private:
 	std::shared_ptr<Logger> logger;
 
 	std::shared_ptr<CommunicationService> communication;
+
+	CommandResult playerJoinRoom(const nlohmann::json &command) const;
 };

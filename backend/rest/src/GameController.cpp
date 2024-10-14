@@ -52,7 +52,7 @@ crow::response GameController::handleJoinGame(const crow::request &req, const st
 
 	if (!body.contains("user")) return crow::response(400);
 
-	const std::shared_ptr<Command> command = std::make_shared<JoinRoom>(body["name"], gameId);
+	const std::shared_ptr<Command> command = std::make_shared<JoinRoom>(body["user"], gameId);
 
 	return execute(command);
 }

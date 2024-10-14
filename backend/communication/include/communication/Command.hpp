@@ -35,8 +35,8 @@ namespace communication
 		CommandData data;
 
 		Command() = default;
-		Command(const std::string& name, const CommandQueue& queue) : name(name), queue(queue) {};
-	
+		Command(const std::string& name, const CommandQueue& queue) : name(name), queue(queue){};
+
 		virtual json toJson() const { return {{"name", name}, {"queue", queue}}; }
 
 		bool operator<(const Command& other) const { return name < other.name; }
@@ -50,6 +50,30 @@ namespace communication
 
 	namespace commands
 	{
+		//	PlayerJoinRoom
+		struct PlayerJoinRoomData : public CommandData
+		{
+			std::string username;
+			std::string roomId;
+
+			PlayerJoinRoomData() = default;
+			PlayerJoinRoomData(const std::string& username, const std::string& roomId) : username(username), roomId(roomId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerJoinRoomData, username, roomId);
+		};
+
+		struct PlayerJoinRoom : public Command
+		{
+			PlayerJoinRoomData data;
+
+			PlayerJoinRoom() : Command("JoinRoom", CommandQueue::GAME) {}
+			PlayerJoinRoom(const std::string& username, const std::string& roomId) : Command("JoinRoom", CommandQueue::GAME), data(username, roomId) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerJoinRoom, name, queue, data);
+		};
+
 		// Room Commands
 		//	GetRooms
 		struct GetRooms : public Command
@@ -124,8 +148,8 @@ namespace communication
 		{
 			JoinRoomData data;
 
-			JoinRoom() : Command("JoinRoom", CommandQueue::GAME) {}
-			JoinRoom(const std::string& username, const std::string& roomId) : Command("JoinRoom", CommandQueue::GAME), data(username, roomId) {}
+			JoinRoom() : Command("JoinRoom", CommandQueue::DATA) {}
+			JoinRoom(const std::string& username, const std::string& roomId) : Command("JoinRoom", CommandQueue::DATA), data(username, roomId) {}
 
 			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
@@ -133,23 +157,23 @@ namespace communication
 		};
 
 		//	LeaveRoom
-		struct LeaveRoomData : public CommandData {
+		struct LeaveRoomData : public CommandData
+		{
 			std::string userId;
 			std::string roomId;
 
 			LeaveRoomData() = default;
-			LeaveRoomData(const std::string& userId, const std::string& roomId)
-				: userId(userId), roomId(roomId) {}
+			LeaveRoomData(const std::string& userId, const std::string& roomId) : userId(userId), roomId(roomId) {}
 
 			NLOHMANN_DEFINE_TYPE_INTRUSIVE(LeaveRoomData, userId, roomId);
 		};
 
-		struct LeaveRoom : public Command {
+		struct LeaveRoom : public Command
+		{
 			LeaveRoomData data;
 
 			LeaveRoom() : Command("LeaveRoom", CommandQueue::GAME) {}
-			LeaveRoom(const std::string& userId, const std::string& roomId)
-				: Command("LeaveRoom", CommandQueue::GAME), data(userId, roomId) {}
+			LeaveRoom(const std::string& userId, const std::string& roomId) : Command("LeaveRoom", CommandQueue::GAME), data(userId, roomId) {}
 
 			NLOHMANN_DEFINE_TYPE_INTRUSIVE(LeaveRoom, name, queue, data);
 		};
@@ -179,4 +203,4 @@ namespace communication
 			NLOHMANN_DEFINE_TYPE_INTRUSIVE(Push, name, queue, data);
 		};
 	};  // namespace commands
-};  // namespace communication
+};      // namespace communication
