@@ -4,9 +4,10 @@
 #include "communication/CommunicationService.hpp"
 #include "communication/SpdLogger.hpp"
 
-int main() {
-	std::shared_ptr<SpdLogger> logger = std::make_shared<SpdLogger>();
-	std::shared_ptr<CommunicationService> communicationService = std::make_shared<CommunicationService>();
+int main()
+{
+	const auto logger = std::make_shared<SpdLogger>();
+	const auto communicationService = std::make_shared<CommunicationService>();
 
 	communicationService->setLogger(logger);
 

@@ -10,7 +10,7 @@ Server::Server(int port, const std::string& host) : server(std::make_unique<ix::
 	if (!success) logger->error("Failed to start the server: {}", error);
 
 	server->setOnClientMessageCallback(
-	    [this](std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket& webSocket, const ix::WebSocketMessagePtr& msg)
+	    [this](const std::shared_ptr<ix::ConnectionState>& connectionState, ix::WebSocket& webSocket, const ix::WebSocketMessagePtr& msg)
 	    {
 			logger->info("Remote ip: {}", connectionState->getRemoteIp());
 

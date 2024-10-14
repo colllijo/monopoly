@@ -15,7 +15,7 @@ public:
 
 	void start();
 
-	void setLogger(std::shared_ptr<Logger> logger) { this->logger = logger; }
+	void setLogger(const std::shared_ptr<Logger>& logger) { this->logger = logger; }
 
 private:
 	std::unique_ptr<ix::WebSocketServer> server;

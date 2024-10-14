@@ -59,7 +59,7 @@ public:
 	CommandResult execute(const std::shared_ptr<Command>& command);
 	void registerCommandHandler(const Command& command, CommandCallback callback);
 
-	void setLogger(const std::shared_ptr<Logger> logger) { this->logger = logger; }
+	void setLogger(const std::shared_ptr<Logger>& logger) { this->logger = logger; }
 
 private:
 	std::shared_ptr<Logger> logger;

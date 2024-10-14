@@ -16,9 +16,9 @@ using namespace communication::commands;
 class GameController
 {
 public:
-	GameController(const std::shared_ptr<crow::App<crow::CORSHandler>>& app, const std::shared_ptr<CommunicationService>& communication);
+	GameController(const std::shared_ptr<crow::App<crow::CORSHandler>> &app, const std::shared_ptr<CommunicationService> &communication);
 
-	void setLogger(const std::shared_ptr<Logger>& logger) { this->logger = logger; }
+	void setLogger(const std::shared_ptr<Logger> &logger) { this->logger = logger; }
 
 private:
 	std::shared_ptr<Logger> logger;

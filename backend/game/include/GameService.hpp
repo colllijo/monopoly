@@ -13,9 +13,9 @@ using communication::CommandResult;
 class GameService
 {
 public:
-	GameService(std::shared_ptr<CommunicationService> communication);
+	GameService(const std::shared_ptr<CommunicationService>& communication);
 
-	void setLogger(std::shared_ptr<Logger> logger) { this->logger = logger; }
+	void setLogger(const std::shared_ptr<Logger>& logger) { this->logger = logger; }
 
 private:
 	std::shared_ptr<Logger> logger;

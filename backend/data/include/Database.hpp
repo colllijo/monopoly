@@ -18,7 +18,7 @@ public:
 	void initialize();
 	bool isDataInitialized() const { return dataInitialized; }
 
-	pqxx::work getTransaction() const { return pqxx::work(*connection.get()); }
+	pqxx::work getTransaction() const { return pqxx::work(*connection); }
 
 private:
 	std::shared_ptr<Logger> logger;

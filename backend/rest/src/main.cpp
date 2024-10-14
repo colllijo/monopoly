@@ -11,10 +11,10 @@
 
 int main()
 {
-	std::shared_ptr<SpdLogger> logger = std::make_shared<SpdLogger>();
-	std::shared_ptr<crow::ILogHandler> crowLogger = std::make_shared<CrowLogger>(logger);
-	std::shared_ptr<crow::App<crow::CORSHandler>> app = std::make_shared<crow::App<crow::CORSHandler>>();
-	std::shared_ptr<CommunicationService> communicationService = std::make_shared<CommunicationService>();
+	const auto logger = std::make_shared<SpdLogger>();
+	const auto crowLogger = std::make_shared<CrowLogger>(logger);
+	const auto app = std::make_shared<crow::App<crow::CORSHandler>>();
+	const auto communicationService = std::make_shared<CommunicationService>();
 
 	crow::logger::setHandler(crowLogger.get());
 	communicationService->setLogger(logger);

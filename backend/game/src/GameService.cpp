@@ -2,6 +2,4 @@
 
 #include "communication/NoOptLogger.hpp"
 
-GameService::GameService(std::shared_ptr<CommunicationService> communication) : logger(NoOptLogger::getInstance()), communication(communication)
-{
-}
+GameService::GameService(const std::shared_ptr<CommunicationService>& communication) : logger(NoOptLogger::getInstance()), communication(communication) {}

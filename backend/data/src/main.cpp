@@ -8,9 +8,9 @@
 
 int main()
 {
-	std::shared_ptr<SpdLogger> logger = std::make_shared<SpdLogger>();
-	std::shared_ptr<CommunicationService> communicationService = std::make_shared<CommunicationService>();
-	std::shared_ptr<Database> database = std::make_shared<Database>();
+	const auto logger = std::make_shared<SpdLogger>();
+	const auto communicationService = std::make_shared<CommunicationService>();
+	const auto database = std::make_shared<Database>();
 
 	communicationService->setLogger(logger);
 	database->setLogger(logger);

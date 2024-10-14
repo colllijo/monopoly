@@ -12,11 +12,12 @@ using communication::CommandResult;
 
 using namespace communication::commands;
 
-class GameRepository {
+class GameRepository
+{
 public:
-	GameRepository(const std::shared_ptr<CommunicationService> &communication, const std::shared_ptr<Database> &database);
+	GameRepository(const std::shared_ptr<CommunicationService>& communication, const std::shared_ptr<Database>& database);
 
-	void setLogger(std::shared_ptr<Logger> logger) { this->logger = logger; }
+	void setLogger(const std::shared_ptr<Logger>& logger) { this->logger = logger; }
 
 private:
 	std::shared_ptr<Logger> logger;
