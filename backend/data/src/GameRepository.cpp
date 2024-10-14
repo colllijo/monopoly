@@ -1,99 +1,131 @@
 #include "GameRepository.hpp"
-
 #include <functional>
-#include <memory>
-#include <string>
-#include <nlohmann/json.hpp>
 
-#include "Game.hpp"
 #include "communication/Command.hpp"
-#include "communication/CommunicationService.hpp"
 #include "communication/NoOptLogger.hpp"
 
-GameRepository::GameRepository(std::shared_ptr<CommunicationService> communication, std::shared_ptr<pqxx::connection> dbConnection)
-    : logger(NoOptLogger::getInstance()), communication(communication), dbConnection(dbConnection)
+GameRepository::GameRepository(const std::shared_ptr<CommunicationService> &communication, const std::shared_ptr<Database> &database)
+	: logger(NoOptLogger::getInstance()), communication(communication), database(database)
 {
-	communication->registerCommandHandler(communication::commands::data::GetGames(), std::bind(&GameRepository::getGames, this, std::placeholders::_1));
-	communication->registerCommandHandler(communication::commands::data::CreateGame(), std::bind(&GameRepository::createGame, this, std::placeholders::_1));
+	communication->registerCommandHandler(GetRooms(), std::bind(&GameRepository::getRooms, this, std::placeholders::_1));
+	communication->registerCommandHandler(CreateRoom(), std::bind(&GameRepository::createRoom, this, std::placeholders::_1));
+	communication->registerCommandHandler(JoinRoom(), std::bind(&GameRepository::joinRoom, this, std::placeholders::_1));
 }
 
-CommandResult GameRepository::getGames(const Command&)
+CommandResult GameRepository::getRooms(const nlohmann::json &) const
 {
-	pqxx::result result;
+	auto txn = database->getTransaction();
 
-	try {
-		pqxx::work txn(*dbConnection);
+	pqxx::result rooms = txn.exec(
+		R"(
+			SELECT Room.id, Room.name, Room.state, COUNT(Player.id) as players FROM Room
+			LEFT JOIN Player ON Room.id = Player.room_id
+			GROUP BY Room.id, Room.name, Room.state
+		)"
+	);
 
-		result = txn.exec(R"(
-			SELECT 
-				games.uuid, 
-				games.name, 
-				games.state, 
-				COUNT(game_players.player_id) AS players
-			FROM 
-				games
-			LEFT JOIN 
-				game_players ON games.id = game_players.game_id
-			GROUP BY 
-				games.uuid, games.name, games.state
-		)");
+	nlohmann::json result = nlohmann::json::array();
 
-		txn.commit();
-	} catch (const pqxx::sql_error &e) {
-		logger->error("Failed to get games: {}", e.what());
-		return CommandResult();
+	for (const auto &room : rooms)
+	{
+		result.push_back({
+			{"id", room[0].as<std::string>()},
+			{"name", room[1].as<std::string>()},
+			{"state", room[2].as<std::string>()},
+			{"players", room[3].as<int>()}
+		});
 	}
 
-	CommandResult data = nlohmann::json::array();
-	for (const pqxx::row &row : result)
-		data.push_back(game::Game(row).toJson());
-
-	return data;
+	return result;
 }
 
-CommandResult GameRepository::createGame(const Command &command)
+CommandResult GameRepository::createRoom(const nlohmann::json &command) const
 {
-	if (
-		!command.data.has_value()
-		|| !command.data->contains("name")
-	) return CommandResult();
+	CreateRoomData data = static_cast<CreateRoom>(command).data;
 
-	std::string name = command.data->value("name", "");
-	std::string user = command.data->value("user", "");
+	auto txn = database->getTransaction();
 
-	try {
-		pqxx::work txn(*dbConnection);
+	pqxx::result room = txn.exec(
+		R"(
+			INSERT INTO Room (name)
+			VALUES ($1)
+			RETURNING *
+		)",
+		pqxx::params{data.roomName}
+	);
 
-		auto player = txn.exec(
-			R"(
-				INSERT INTO players (name) VALUES ($1)
-				RETURNING *
-			)",
-			pqxx::params{user}
-		);
+	pqxx::result player = txn.exec(
+		R"(
+			INSERT INTO Player (username, room_id, color)
+			VALUES ($1, $2, 'RED')
+			RETURNING *
+		)",
+		pqxx::params{data.username, room[0][0].as<std::string>()}
+	);
 
-		auto game = txn.exec(
-			R"(
-				INSERT INTO games (name) VALUES ($1)
-				RETURNING games.id, games.uuid, games.name, games.state, 1 AS players
-			)",
-			pqxx::params{name}
-		);
+	txn.commit();
 
-		txn.exec(
-			R"(
-				INSERT INTO game_players (game_id, player_id, hosting) VALUES ($1, $2, TRUE)
-			)",
-			pqxx::params{game[0]["id"].as<int>(), player[0]["id"].as<int>()}
-		);
+	return CommandResult{
+		{"player", {
+			{"id", player[0][0].as<std::string>()},
+			{"username", player[0][1].as<std::string>()},
+			{"color", player[0][3].as<std::string>()},
+			{"money", player[0][4].as<int>()},
+			{"position", player[0][5].as<int>()}
+		}},
+		{"room", {
+			{"id", room[0][0].as<std::string>()},
+			{"name", room[0][1].as<std::string>()},
+			{"state", room[0][2].as<std::string>()}
+		}}
+	};
+}
 
-		txn.commit();
-		
-		logger->info("Created game: {}", name);
-		return game::Game(game[0]).toJson();
-	} catch (const pqxx::sql_error &e) {
-		logger->error("Failed to create game: {}", e.what());
+CommandResult GameRepository::joinRoom(const nlohmann::json &command) const
+{
+	logger->info("Joining room: {}", command.dump());
+	JoinRoomData data = static_cast<JoinRoom>(command).data;
+
+	auto txn = database->getTransaction();
+
+	pqxx::result room = txn.exec(
+		R"(
+			SELECT * FROM Room
+			WHERE id = $1
+		)",
+		pqxx::params{data.roomId}
+	);
+
+	if (room.empty())
+	{
+		return CommandResult{
+			{"error", "Room not found"}
+		};
 	}
 
-	return CommandResult();
+	pqxx::result player = txn.exec(
+		R"(
+			INSERT INTO Player (username, room_id, color)
+			VALUES ($1, $2, 'GREEN')
+			RETURNING *
+		)",
+		pqxx::params{data.username, data.roomId}
+	);
+
+	txn.commit();
+
+	return CommandResult{
+		{"player", {
+			{"id", player[0][0].as<std::string>()},
+			{"username", player[0][1].as<std::string>()},
+			{"color", player[0][3].as<std::string>()},
+			{"money", player[0][4].as<int>()},
+			{"position", player[0][5].as<int>()}
+		}},
+		{"room", {
+			{"id", room[0][0].as<std::string>()},
+			{"name", room[0][1].as<std::string>()},
+			{"state", room[0][2].as<std::string>()}
+		}}
+	};
 }
