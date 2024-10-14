@@ -1,24 +1,25 @@
 #pragma once
 
-#include <crow.h>
+#include <crow/app.h>
 
 #include <memory>
 #include <string>
 
 #include "communication/CommunicationService.hpp"
 #include "communication/Logger.hpp"
+#include "crow/middlewares/cors.h"
 
 class GameController
 {
 public:
-	GameController(const std::shared_ptr<crow::SimpleApp>& app, const std::shared_ptr<CommunicationService>& communication);
+	GameController(const std::shared_ptr<crow::App<crow::CORSHandler>>& app, const std::shared_ptr<CommunicationService>& communication);
 
-	void setLogger(std::shared_ptr<Logger> logger) { this->logger = logger; }
+	void setLogger(const std::shared_ptr<Logger>& logger) { this->logger = logger; }
 
 private:
 	std::shared_ptr<Logger> logger;
 
-	std::shared_ptr<crow::SimpleApp> app;
+	std::shared_ptr<crow::App<crow::CORSHandler>> app;
 	std::shared_ptr<CommunicationService> communication;
 
 	// Method to register routes

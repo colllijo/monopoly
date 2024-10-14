@@ -1,4 +1,5 @@
 #include <crow.h>
+#include "crow/middlewares/cors.h"
 
 #include <memory>
 
@@ -12,7 +13,7 @@ int main()
 {
 	std::shared_ptr<SpdLogger> logger = std::make_shared<SpdLogger>();
 	std::shared_ptr<crow::ILogHandler> crowLogger = std::make_shared<CrowLogger>(logger);
-	std::shared_ptr<crow::SimpleApp> app = std::make_shared<crow::SimpleApp>();
+	std::shared_ptr<crow::App<crow::CORSHandler>> app = std::make_shared<crow::App<crow::CORSHandler>>();
 	std::shared_ptr<CommunicationService> communicationService = std::make_shared<CommunicationService>();
 
 	crow::logger::setHandler(crowLogger.get());

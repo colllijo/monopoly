@@ -1,11 +1,13 @@
 #include "GameController.hpp"
 
+#include <crow/app.h>
+
 #include <nlohmann/json.hpp>
 
 #include "communication/Command.hpp"
 #include "communication/NoOptLogger.hpp"
 
-GameController::GameController(const std::shared_ptr<crow::SimpleApp> &app, const std::shared_ptr<CommunicationService> &communication)
+GameController::GameController(const std::shared_ptr<crow::App<crow::CORSHandler>> &app, const std::shared_ptr<CommunicationService> &communication)
     : logger(NoOptLogger::getInstance()), app(app), communication(communication)
 {
 	registerRoutes();
@@ -62,18 +64,18 @@ crow::response GameController::handleJoinGame(const crow::request &req, std::str
 		return crow::response(400);
 	}
 
-	if (!body.contains("name")) return crow::response(400);
+	if (!body.contains("user")) return crow::response(400);
 
-	const communication::commands::JoinGame command({{"gameId", gameId}, {"name", body["name"]}});
+	const communication::commands::JoinGame command({{"gameId", gameId}, {"user", body["user"]}});
 
 	return execute(command);
 }
 
-crow::response GameController::handleLeaveGame(std::string &gameId) const
+crow::response GameController::handleLeaveGame(std::string &playerId) const
 {
-	if (gameId.empty()) return crow::response(400);
+	if (playerId.empty()) return crow::response(400);
 
-	const communication::commands::LeaveGame command(nlohmann::json({{"gameId", gameId}}));
+	const communication::commands::LeaveGame command(nlohmann::json({{"playerId", playerId}}));
 
 	return execute(command);
 }
