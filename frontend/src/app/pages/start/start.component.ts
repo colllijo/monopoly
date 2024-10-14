@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
@@ -8,9 +8,13 @@ import {FormsModule} from "@angular/forms";
 import {NgForOf} from "@angular/common";
 import {MatCard} from "@angular/material/card";
 import {MatList, MatListItem} from "@angular/material/list";
-import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
+import {MatInput, MatLabel} from "@angular/material/input";
 import {CreateGameComponent} from "../../dialog/create-game/create-game.component";
 import {MatDialog} from "@angular/material/dialog";
+import {ClientService} from "../../service/client.service";
+import {Rooms} from "../../model/rooms";
+import {CreateRoom} from "../../model/createRoom";
+import {MatFormField} from "@angular/material/form-field";
 
 @Component({
   selector: 'app-start',
@@ -19,14 +23,13 @@ import {MatDialog} from "@angular/material/dialog";
   standalone: true,
   imports: [MatTableModule, MatPaginatorModule, MatSortModule, MatIcon, MatFabButton, FormsModule, NgForOf, MatCard, MatList, MatListItem, MatButton, MatInput, MatLabel, MatFormField]
 })
-export class StartComponent {
+export class StartComponent implements OnInit{
   playerName: string = '';
-  games: { name: string, creator: string }[] = [
-    { name: 'Game 1', creator: 'Alice' },
-    { name: 'Game 2', creator: 'Bob' }
-  ];
+  rooms : Array<Rooms> = new Array<Rooms>()
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog, private clientService: ClientService) {
+    clientService.getRooms()
+  }
 
   createNewGame() {
     if (this.playerName) {
@@ -34,16 +37,20 @@ export class StartComponent {
         width: '250px',
         data: { playerName: this.playerName }
       });
-
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          const newGame = { name: result, creator: this.playerName };
-          this.games.push(newGame);
+          let createRoom = { user: this.playerName, name: result };
+          this.clientService.createRoom(createRoom).subscribe()
         }
       });
     } else {
       alert('Please enter your name to create a game.');
     }
   }
+
+  ngOnInit(): void {
+    this.clientService.getRooms().subscribe(obj => {
+      this.rooms = obj
+    })  }
 
 }
