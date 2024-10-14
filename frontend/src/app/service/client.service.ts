@@ -10,7 +10,6 @@ import {Rooms} from "../model/rooms";
 export class ClientService {
   private readonly httpClient = inject(HttpClient);
 
-
   public getRooms(): Observable<Array<Rooms>> {
     return this.httpClient.get<Array<Rooms>>('http://localhost:8080/games');
   }

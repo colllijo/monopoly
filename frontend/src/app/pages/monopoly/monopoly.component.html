@@ -2,12 +2,14 @@
   <div class="board">
     <div class="center">
       <h1 class="title">MONOPOLY</h1>
+      <p>{{ user }} ist am Zug!</p>
+      <button mat-raised-button>Würfeln</button>
     </div>
 
     <div class="space corner go">
       <div class="container">
         <div class="instructions">Nimm 2000$</div>
-        <div class="go-word">Start</div>
+        <div class="go-word">{{ getFieldById(0)?.name }}</div>
       </div>
       <div class="arrow fa fa-long-arrow-left"></div>
     </div>
@@ -16,15 +18,15 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar light-blue"></div>
-          <div class="name">Thun</div>
-          <div class="price">Preis $2420</div>
+          <div class="name">{{ getFieldById(9)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(9)?.price}}</div>
         </div>
       </div>
       <div class="space property">
         <div class="container">
           <div class="color-bar light-blue"></div>
-          <div class="name">Neuenburg</div>
-          <div class="price">Preis $2000</div>
+          <div class="name">{{ getFieldById(8)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(8)?.price}}</div>
         </div>
       </div>
       <div class="space chance">
@@ -36,8 +38,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar light-blue"></div>
-          <div class="name">Aarau</div>
-          <div class="price">Preis $2000</div>
+          <div class="name">{{ getFieldById(6)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(6)?.price}}</div>
         </div>
       </div>
       <div class="space railroad">
@@ -56,8 +58,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar dark-purple"></div>
-          <div class="name">Schaffhausen</div>
-          <div class="price">Preis $1200</div>
+          <div class="name">{{ getFieldById(3)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(3)?.price}}</div>
         </div>
       </div>
       <div class="space community-chest">
@@ -70,8 +72,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar dark-purple"></div>
-          <div class="name three-line-name">Chur</div>
-          <div class="price">Preis $1200</div>
+          <div class="name three-line-name">{{ getFieldById(1)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(1)?.price}}</div>
         </div>
       </div>
     </div>
@@ -97,15 +99,15 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar orange"></div>
-          <div class="name">La Chaux-de-Fonds</div>
-          <div class="price">Preis $4000</div>
+          <div class="name">{{ getFieldById(19)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(19)?.price}}</div>
         </div>
       </div>
       <div class="space property">
         <div class="container">
           <div class="color-bar orange"></div>
-          <div class="name">Freiburg</div>
-          <div class="price">Preis $3600</div>
+          <div class="name">{{ getFieldById(18)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(18)?.price}}</div>
         </div>
       </div>
       <div class="space community-chest">
@@ -118,8 +120,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar orange"></div>
-          <div class="name">Biel</div>
-          <div class="price">Preis $3600</div>
+          <div class="name">{{ getFieldById(16)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(16)?.price}}</div>
         </div>
       </div>
       <div class="space railroad">
@@ -132,15 +134,15 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar purple"></div>
-          <div class="name">Lugano</div>
-          <div class="price">Preis $3200</div>
+          <div class="name">{{ getFieldById(14)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(14)?.price}}</div>
         </div>
       </div>
       <div class="space property">
         <div class="container">
           <div class="color-bar purple"></div>
-          <div class="name">Solothurn</div>
-          <div class="price">Preis $2800</div>
+          <div class="name">{{ getFieldById(13)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(13)?.price}}</div>
         </div>
       </div>
       <div class="space utility electric-company">
@@ -153,8 +155,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar purple"></div>
-          <div class="name">Basel</div>
-          <div class="price">Preis $2800</div>
+          <div class="name">{{ getFieldById(11)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(11)?.price}}</div>
         </div>
       </div>
     </div>
@@ -171,8 +173,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar red"></div>
-          <div class="name">Winterthur</div>
-          <div class="price">Preis $4400</div>
+          <div class="name">{{ getFieldById(21)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(21)?.price}}</div>
         </div>
       </div>
       <div class="space chance">
@@ -184,15 +186,15 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar red"></div>
-          <div class="name">St. Gallsen</div>
-          <div class="price">Preis $4400</div>
+          <div class="name">{{ getFieldById(23)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(23)?.price}}</div>
         </div>
       </div>
       <div class="space property">
         <div class="container">
           <div class="color-bar red"></div>
-          <div class="name">Bern</div>
-          <div class="price">Preis $4800</div>
+          <div class="name">{{ getFieldById(24)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(24)?.price}}</div>
         </div>
       </div>
       <div class="space railroad">
@@ -205,15 +207,15 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar yellow"></div>
-          <div class="name">Luzern</div>
-          <div class="price">Preis $5200</div>
+          <div class="name">{{ getFieldById(26)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(26)?.price}}</div>
         </div>
       </div>
       <div class="space property">
         <div class="container">
           <div class="color-bar yellow"></div>
-          <div class="name">Zürich</div>
-          <div class="price">Preis $5200</div>
+          <div class="name">{{ getFieldById(27)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(27)?.price}}</div>
         </div>
       </div>
       <div class="space utility waterworks">
@@ -226,8 +228,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar yellow"></div>
-          <div class="name">Lausanne</div>
-          <div class="price">Preis $5600</div>
+          <div class="name">{{ getFieldById(29)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(29)?.price}}</div>
         </div>
       </div>
     </div>
@@ -244,15 +246,15 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar green"></div>
-          <div class="name">Basel</div>
-          <div class="price">Preis $6000</div>
+          <div class="name">{{ getFieldById(31)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(31)?.price}}</div>
         </div>
       </div>
       <div class="space property">
         <div class="container">
           <div class="color-bar green"></div>
-          <div class="name three-line-name">Genf</div>
-          <div class="price">Preis $6000</div>
+          <div class="name three-line-name">{{ getFieldById(32)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(32)?.price}}</div>
         </div>
       </div>
       <div class="space community-chest">
@@ -265,8 +267,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar green"></div>
-          <div class="name long-name">Bern</div>
-          <div class="price">Preis $6400</div>
+          <div class="name long-name">{{ getFieldById(34)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(34)?.price}}</div>
         </div>
       </div>
       <div class="space railroad">
@@ -285,8 +287,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar dark-blue"></div>
-          <div class="name">Lausanne</div>
-          <div class="price">Preis $7000</div>
+          <div class="name">{{ getFieldById(37)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(37)?.price}}</div>
         </div>
       </div>
       <div class="space fee luxury-tax">
@@ -299,8 +301,8 @@
       <div class="space property">
         <div class="container">
           <div class="color-bar dark-blue"></div>
-          <div class="name">Zürich</div>
-          <div class="price">Preis $8000</div>
+          <div class="name">{{ getFieldById(39)?.name }}</div>
+          <div class="price">Preis $ {{ getFieldById(39)?.price}}</div>
         </div>
       </div>
     </div>

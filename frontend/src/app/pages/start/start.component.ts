@@ -36,6 +36,8 @@ export class StartComponent implements OnInit{
     if (this.playerName) {
       this.clientService.joinRoom(user, gameId).subscribe()
       this.router.navigate(['monopoly/' + name])
+    } else {
+      alert('Please enter your name to join a game.');
     }
   }
 
