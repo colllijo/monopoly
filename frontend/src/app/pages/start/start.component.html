@@ -8,14 +8,14 @@
                 <mat-label>Your Name</mat-label>
                 <input matInput [(ngModel)]="playerName" placeholder="Enter your name">
             </mat-form-field>
-            <button mat-raised-button color="primary" (click)="createNewGame()">Create Game</button>
+            <button mat-raised-button color="primary" (click)="createNewRoom()">Create Game</button>
         </div>
     </mat-card>
 
     <mat-card class="game-list">
         <h2>Existing Games</h2>
         <mat-list>
-            <mat-list-item *ngFor="let room of rooms">
+            <mat-list-item *ngFor="let room of rooms" (click)="joinRoom(playerName, room.uuid, room.name)">
                 {{ room.name }} - Players: {{ room.players }}
             </mat-list-item>
         </mat-list>

@@ -13,8 +13,8 @@ import {CreateGameComponent} from "../../dialog/create-game/create-game.componen
 import {MatDialog} from "@angular/material/dialog";
 import {ClientService} from "../../service/client.service";
 import {Rooms} from "../../model/rooms";
-import {CreateRoom} from "../../model/createRoom";
 import {MatFormField} from "@angular/material/form-field";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-start',
@@ -27,11 +27,19 @@ export class StartComponent implements OnInit{
   playerName: string = '';
   rooms : Array<Rooms> = new Array<Rooms>()
 
-  constructor(public dialog: MatDialog, private clientService: ClientService) {
+  constructor(public dialog: MatDialog, private clientService: ClientService, private router: Router
+  ) {
     clientService.getRooms()
   }
 
-  createNewGame() {
+  joinRoom(user: string, gameId: string, name: string) {
+    if (this.playerName) {
+      this.clientService.joinRoom(user, gameId).subscribe()
+      this.router.navigate(['monopoly/' + name])
+    }
+  }
+
+  createNewRoom() {
     if (this.playerName) {
       const dialogRef = this.dialog.open(CreateGameComponent, {
         width: '250px',

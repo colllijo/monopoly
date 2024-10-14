@@ -2,5 +2,5 @@ export class Rooms {
   name!: string;
   players!: number;
   state!: string;
-  uuid!: number;
+  uuid!: string;
 }

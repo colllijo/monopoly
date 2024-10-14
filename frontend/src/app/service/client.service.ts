@@ -18,4 +18,9 @@ export class ClientService {
   public createRoom(createRoom: CreateRoom): Observable<Rooms> {
     return this.httpClient.post<Rooms>('http://localhost:8080/games', JSON.stringify(createRoom));
   }
+
+  public joinRoom(user: string, gameId: string): Observable<Rooms> {
+    return this.httpClient.post<Rooms>('http://localhost:8080/games/' + gameId, JSON.stringify({user}));
+  }
+
 }
