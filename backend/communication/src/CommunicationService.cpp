@@ -2,8 +2,9 @@
 
 #include <chrono>
 #include <mutex>
+#include "Command.hpp"
 
-CommunicationService::CommunicationService(const std::shared_ptr<Logger> logger)
+CommunicationService::CommunicationService(const std::shared_ptr<Logger>& logger)
     : logger(logger),
       base(event_base_new(), event_base_free),
       async(false),
@@ -43,16 +44,19 @@ void CommunicationService::declareQueue(const std::string_view &queueName)
 			                }
 
 			                // Parse the command
-			                Command command;
+							nlohmann::json data;
 			                try
 			                {
-				                command = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
+				                data = nlohmann::json::parse(std::string(message.body(), message.bodySize()));
 			                }
 			                catch (const std::exception &e)
 			                {
 				                channel->ack(deliveryTag);
 				                return;
 			                }
+
+							logger->info("Received message: {}", data.dump());
+							Command command = static_cast<Command>(data);
 
 							// Check if command is expired
 							std::unique_lock<std::mutex> lock(requestsMutex);
@@ -73,8 +77,8 @@ void CommunicationService::declareQueue(const std::string_view &queueName)
 			                }
 
 			                channel->ack(deliveryTag);
-			                logger->info("Received command: {}", command.command);
-			                commandQueue.push({command, message.correlationID(), message.replyTo(), deliveryTag});
+			                logger->info("Received command: {}", command.name);
+			                commandQueue.push({data, message.correlationID(), message.replyTo(), deliveryTag});
 		                })
 		            .onSuccess([this, queueName]() { logger->info("Listening on queue: {}", queueName); })
 		            .onError([this, queueName](const char *message) { logger->error("Failed to consume from queue {}: {}", queueName, message); });
@@ -144,7 +148,7 @@ void CommunicationService::stop()
 
 void CommunicationService::registerCommandHandler(const Command &command, CommandCallback callback) { handlers[command] = callback; }
 
-CommandResult CommunicationService::execute(const Command &command)
+CommandResult CommunicationService::execute(const std::shared_ptr<Command> &command)
 {
 	std::shared_ptr<CommandPromise> promise = std::make_shared<CommandPromise>();
 	std::future<CommandResult> future = promise->get_future();
@@ -156,17 +160,18 @@ CommandResult CommunicationService::execute(const Command &command)
 		requests[correlationId] = std::move(promise);
 	}
 
-	std::string payload = ((nlohmann::json)command).dump();
+	std::string payload = command->toJson().dump();
 
 	AMQP::Envelope msg(payload.c_str(), payload.size());
 	msg.setReplyTo(responseQueue);
 	msg.setCorrelationID(correlationId);
 
-	channel->publish("", communication::getQueuenName(command.queue), msg);
+	logger->info("Sending command: {} to {}", command->toJson().dump(), communication::getQueuenName(command->queue));
+	channel->publish("", communication::getQueuenName(command->queue), msg);
 
 	if (future.wait_for(std::chrono::seconds(8)) == std::future_status::ready) return future.get();
 
-	logger->info("Command timed out: {}", command.command);
+	logger->info("Command timed out: {}", command->name);
 	removeCommand(correlationId);
 	return nullptr;
 }

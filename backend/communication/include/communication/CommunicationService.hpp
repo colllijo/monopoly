@@ -28,7 +28,7 @@ using communication::CommandResult;
 
 struct CommandData
 {
-	Command command;
+	nlohmann::json command;
 	std::string correlationId;
 	std::string replyTo;
 	uint64_t deliveryTag;
@@ -46,18 +46,18 @@ class CommunicationService
 public:
 	using EventBasePtr = std::unique_ptr<struct event_base, std::function<void(struct event_base*)>>;
 	using EventPtr = std::unique_ptr<struct event, std::function<void(struct event*)>>;
-	using CommandCallback = std::function<CommandResult(const communication::Command&)>;
+	using CommandCallback = std::function<CommandResult(const nlohmann::json&)>;
 	using CommandPromise = std::promise<CommandResult>;
 
-	CommunicationService(const std::shared_ptr<Logger> logger = NoOptLogger::getInstance());
+	CommunicationService(const std::shared_ptr<Logger>& logger = NoOptLogger::getInstance());
 	~CommunicationService() = default;
 
 	void start();
 	void start_async();
 	void stop();
 
-	CommandResult execute(const struct communication::Command& command);
-	void registerCommandHandler(const communication::Command& command, CommandCallback callback);
+	CommandResult execute(const std::shared_ptr<Command>& command);
+	void registerCommandHandler(const Command& command, CommandCallback callback);
 
 	void setLogger(const std::shared_ptr<Logger> logger) { this->logger = logger; }
 

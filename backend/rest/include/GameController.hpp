@@ -8,6 +8,10 @@
 #include "communication/CommunicationService.hpp"
 #include "communication/Logger.hpp"
 
+using communication::Command;
+
+using namespace communication::commands;
+
 class GameController
 {
 public:
@@ -26,8 +30,8 @@ private:
 
 	// Route handler methods
 	crow::response handleGetGames() const;
-	crow::response handleCreateGame(const crow::request &req) const;
-	crow::response handleJoinGame(const crow::request &req, std::string &gameId) const;
-	crow::response handleLeaveGame(std::string &gameId) const;
-	crow::response execute(const communication::Command &command) const;
+	crow::response handleCreateRoom(const crow::request &req) const;
+	crow::response handleJoinGame(const crow::request &req, const std::string &gameId) const;
+
+	crow::response execute(const std::shared_ptr<Command> &command) const;
 };

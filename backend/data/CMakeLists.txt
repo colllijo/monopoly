@@ -10,14 +10,15 @@ set(INCLUDE_DIR "include")
 
 # Set header files
 set(HEADERS
-  "${INCLUDE_DIR}/GameRepository.hpp"
   "${INCLUDE_DIR}/Database.hpp"
+  "${INCLUDE_DIR}/GameRepository.hpp"
   "${INCLUDE_DIR}/Game.hpp"
 )
 
 # Set source files
 set(SOURCES
   "${SOURCE_DIR}/main.cpp"
+  "${SOURCE_DIR}/Database.cpp"
   "${SOURCE_DIR}/GameRepository.cpp"
 )
 

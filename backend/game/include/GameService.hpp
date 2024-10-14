@@ -21,7 +21,4 @@ private:
 	std::shared_ptr<Logger> logger;
 
 	std::shared_ptr<CommunicationService> communication;
-
-	CommandResult getGames(const Command& command);
-	CommandResult createGame(const Command& command);
 };

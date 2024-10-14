@@ -1,10 +1,11 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
-#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+
+using nlohmann::json;
 
 namespace communication
 {
@@ -23,75 +24,112 @@ namespace communication
 
 	inline std::string_view getQueuenName(CommandQueue queue) { return QUEUE_NAMES.at(queue); }
 
-	struct Command
+	struct CommandData
 	{
-		std::string command;
-		CommandQueue queue;
-		std::optional<nlohmann::json> data;
-
-		bool operator<(const Command& other) const { return command < other.command; }
-
-		bool operator==(const Command& other) const { return command == other.command; }
 	};
 
-	inline void to_json(nlohmann::json& j, const Command& cmd)
+	struct Command
 	{
-		j = nlohmann::json{
-		    {"command", cmd.command},
-		    {"queue", cmd.queue},
-		    {"data", cmd.data ? *cmd.data : nullptr},
-		};
-	}
+		std::string name;
+		CommandQueue queue;
+		CommandData data;
 
-	inline void from_json(const nlohmann::json& j, Command& cmd)
-	{
-		j.at("command").get_to(cmd.command);
-		j.at("queue").get_to(cmd.queue);
-		if (j.contains("data") && !j["data"].is_null())
-			cmd.data = j["data"];
-		else
-			cmd.data.reset();
-	}
+		Command() = default;
+		Command(const std::string& name, const CommandQueue& queue) : name(name), queue(queue) {};
+	
+		virtual json toJson() const { return {{"name", name}, {"queue", queue}}; }
 
-	typedef nlohmann::json CommandResult;
+		bool operator<(const Command& other) const { return name < other.name; }
+
+		bool operator==(const Command& other) const { return name == other.name; }
+
+		NLOHMANN_DEFINE_TYPE_INTRUSIVE(Command, name, queue);
+	};
+
+	typedef json CommandResult;
 
 	namespace commands
 	{
-		struct GetGames : public communication::Command
+		// Room Commands
+		//	GetRooms
+		struct GetRooms : public Command
 		{
-			GetGames() : Command("GetGames", communication::CommandQueue::GAME, std::nullopt) {}
+			GetRooms() : Command("GetRooms", CommandQueue::DATA) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetRooms, name, queue);
 		};
 
-		struct CreateGame : public communication::Command
+
+		//	CreateRoom
+		struct CreateRoomData : public CommandData
 		{
-			CreateGame() : Command("CreateGame", communication::CommandQueue::GAME, std::nullopt) {}
-			CreateGame(nlohmann::json data) : Command("CreateGame", communication::CommandQueue::GAME, data) {}
+			std::string roomName;
+			std::string username;
+
+			CreateRoomData() = default;
+			CreateRoomData(const std::string& roomName, const std::string& username) : roomName(roomName), username(username) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(CreateRoomData, roomName, username);
 		};
 
-		struct JoinGame : public communication::Command
+		struct CreateRoom : public Command
 		{
-			JoinGame() : Command("JoinGame", communication::CommandQueue::GAME, std::nullopt) {}
-			JoinGame(nlohmann::json data) : Command("JoinGame", communication::CommandQueue::GAME, data) {}
+			CreateRoomData data;
+
+			CreateRoom() : Command("CreateRoom", communication::CommandQueue::DATA) {}
+			CreateRoom(const std::string& roomName, const std::string& username) : Command("CreateRoom", communication::CommandQueue::DATA), data(roomName, username) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(CreateRoom, name, queue, data);
 		};
 
-		struct LeaveGame : public communication::Command
+		//	JoinRoom
+		struct JoinRoomData : public CommandData
 		{
-			LeaveGame() : Command("LeaveGame", communication::CommandQueue::GAME, std::nullopt) {}
-			LeaveGame(nlohmann::json data) : Command("LeaveGame", communication::CommandQueue::GAME, data) {}
+			std::string username;
+			std::string roomId;
+
+			JoinRoomData() = default;
+			JoinRoomData(const std::string& username, const std::string& roomId) : username(username), roomId(roomId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(JoinRoomData, username, roomId);
 		};
 
-		namespace data
+		struct JoinRoom : public Command
 		{
-			struct GetGames : public communication::Command
-			{
-				GetGames() : Command("DataGetGames", communication::CommandQueue::DATA, std::nullopt) {}
-			};
+			JoinRoomData data;
 
-			struct CreateGame : public communication::Command
-			{
-				CreateGame() : Command("DataCreateGame", communication::CommandQueue::DATA, std::nullopt) {}
-				CreateGame(nlohmann::json data) : Command("DataCreateGame", communication::CommandQueue::DATA, data) {}
-			};
-		};  // namespace data
+			JoinRoom() : Command("JoinRoom", CommandQueue::GAME) {}
+			JoinRoom(const std::string& username, const std::string& roomId) : Command("JoinRoom", CommandQueue::GAME), data(username, roomId) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(JoinRoom, name, queue, data);
+		};
+
+		//	LeaveRoom
+		struct LeaveRoomData : public CommandData {
+			std::string userId;
+			std::string roomId;
+
+			LeaveRoomData() = default;
+			LeaveRoomData(const std::string& userId, const std::string& roomId)
+				: userId(userId), roomId(roomId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(LeaveRoomData, userId, roomId);
+		};
+
+		struct LeaveRoom : public Command {
+			LeaveRoomData data;
+
+			LeaveRoom() : Command("LeaveRoom", CommandQueue::GAME) {}
+			LeaveRoom(const std::string& userId, const std::string& roomId)
+				: Command("LeaveRoom", CommandQueue::GAME), data(userId, roomId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(LeaveRoom, name, queue, data);
+		};
 	};  // namespace commands
 };  // namespace communication
