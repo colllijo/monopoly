@@ -11,7 +11,7 @@ set(INCLUDE_DIR "include")
 # Set header files
 set(HEADERS
   "${INCLUDE_DIR}/Database.hpp"
-  "${INCLUDE_DIR}/GameRepository.hpp"
+  "${INCLUDE_DIR}/RoomRepository.hpp"
   "${INCLUDE_DIR}/Game.hpp"
 )
 
@@ -19,7 +19,7 @@ set(HEADERS
 set(SOURCES
   "${SOURCE_DIR}/main.cpp"
   "${SOURCE_DIR}/Database.cpp"
-  "${SOURCE_DIR}/GameRepository.cpp"
+  "${SOURCE_DIR}/RoomRepository.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

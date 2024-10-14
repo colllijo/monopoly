@@ -61,6 +61,28 @@ namespace communication
 			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetRooms, name, queue);
 		};
 
+		//	GetRoomByPlayerId
+		struct GetRoomByPlayerIdData : public CommandData
+		{
+			std::string playerId;
+
+			GetRoomByPlayerIdData() = default;
+			GetRoomByPlayerIdData(const std::string& playerId) : playerId(playerId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetRoomByPlayerIdData, playerId);
+		};
+
+		struct GetRoomByPlayerId : public Command
+		{
+			GetRoomByPlayerIdData data;
+
+			GetRoomByPlayerId() : Command("GetRoomByPlayerId", CommandQueue::DATA) {}
+			GetRoomByPlayerId(const std::string& playerId) : Command("GetRoomByPlayerId", CommandQueue::DATA), data(playerId) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetRoomByPlayerId, name, queue, data);
+		};
 
 		//	CreateRoom
 		struct CreateRoomData : public CommandData
@@ -130,6 +152,31 @@ namespace communication
 				: Command("LeaveRoom", CommandQueue::GAME), data(userId, roomId) {}
 
 			NLOHMANN_DEFINE_TYPE_INTRUSIVE(LeaveRoom, name, queue, data);
+		};
+
+		// WebSocket Commands
+		//	Push
+		struct PushData : public CommandData
+		{
+			std::string receiver;
+			json data;
+
+			PushData() = default;
+			PushData(const json& data) : data(data) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PushData, data);
+		};
+
+		struct Push : public Command
+		{
+			PushData data;
+
+			Push() : Command("Push", CommandQueue::PUSH) {}
+			Push(const json& data) : Command("Push", CommandQueue::PUSH), data(data) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(Push, name, queue, data);
 		};
 	};  // namespace commands
 };  // namespace communication

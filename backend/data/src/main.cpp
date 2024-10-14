@@ -2,7 +2,7 @@
 #include <pqxx/pqxx>
 
 #include "Database.hpp"
-#include "GameRepository.hpp"
+#include "RoomRepository.hpp"
 #include "communication/CommunicationService.hpp"
 #include "communication/SpdLogger.hpp"
 
@@ -19,8 +19,8 @@ int main()
 	if (!database->isDataInitialized()) return 1;
 
 	// Declare handlers
-	GameRepository gameRepository(communicationService, database);
-	gameRepository.setLogger(logger);
+	RoomRepository roomRepository(communicationService, database);
+	roomRepository.setLogger(logger);
 
 	// Initialize DB schema
 	if (!database->isDataInitialized()) return 1;

@@ -1,18 +1,19 @@
-#include "GameRepository.hpp"
+#include "RoomRepository.hpp"
 #include <functional>
 
 #include "communication/Command.hpp"
 #include "communication/NoOptLogger.hpp"
 
-GameRepository::GameRepository(const std::shared_ptr<CommunicationService> &communication, const std::shared_ptr<Database> &database)
+RoomRepository::RoomRepository(const std::shared_ptr<CommunicationService> &communication, const std::shared_ptr<Database> &database)
 	: logger(NoOptLogger::getInstance()), communication(communication), database(database)
 {
-	communication->registerCommandHandler(GetRooms(), std::bind(&GameRepository::getRooms, this, std::placeholders::_1));
-	communication->registerCommandHandler(CreateRoom(), std::bind(&GameRepository::createRoom, this, std::placeholders::_1));
-	communication->registerCommandHandler(JoinRoom(), std::bind(&GameRepository::joinRoom, this, std::placeholders::_1));
+	communication->registerCommandHandler(GetRooms(), std::bind(&RoomRepository::getRooms, this, std::placeholders::_1));
+	communication->registerCommandHandler(GetRoomByPlayerId(), std::bind(&RoomRepository::getRoomByPlayerId, this, std::placeholders::_1));
+	communication->registerCommandHandler(CreateRoom(), std::bind(&RoomRepository::createRoom, this, std::placeholders::_1));
+	communication->registerCommandHandler(JoinRoom(), std::bind(&RoomRepository::joinRoom, this, std::placeholders::_1));
 }
 
-CommandResult GameRepository::getRooms(const nlohmann::json &) const
+CommandResult RoomRepository::getRooms(const nlohmann::json &) const
 {
 	auto txn = database->getTransaction();
 
@@ -39,7 +40,39 @@ CommandResult GameRepository::getRooms(const nlohmann::json &) const
 	return result;
 }
 
-CommandResult GameRepository::createRoom(const nlohmann::json &command) const
+CommandResult RoomRepository::getRoomByPlayerId(const nlohmann::json &command) const
+{
+	GetRoomByPlayerIdData data = static_cast<GetRoomByPlayerId>(command).data;
+
+	auto txn = database->getTransaction();
+
+    pqxx::result room = txn.exec(
+        R"(
+            SELECT Room.id, Room.name, Room.state, COUNT(Player.id) as players 
+            FROM Room
+            JOIN Player ON Room.id = Player.room_id
+            WHERE Player.id = $1
+            GROUP BY Room.id, Room.name, Room.state
+        )",
+        pqxx::params{data.playerId}
+    );
+
+    if (room.empty())
+    {
+        return CommandResult{
+            {"error", "Room not found"}
+        };
+    }
+
+    return CommandResult {
+        {"id", room[0][0].as<std::string>()},
+        {"name", room[0][1].as<std::string>()},
+        {"state", room[0][2].as<std::string>()},
+        {"players", room[0][3].as<int>()}
+    };
+}
+
+CommandResult RoomRepository::createRoom(const nlohmann::json &command) const
 {
 	CreateRoomData data = static_cast<CreateRoom>(command).data;
 
@@ -81,7 +114,7 @@ CommandResult GameRepository::createRoom(const nlohmann::json &command) const
 	};
 }
 
-CommandResult GameRepository::joinRoom(const nlohmann::json &command) const
+CommandResult RoomRepository::joinRoom(const nlohmann::json &command) const
 {
 	logger->info("Joining room: {}", command.dump());
 	JoinRoomData data = static_cast<JoinRoom>(command).data;
@@ -103,13 +136,37 @@ CommandResult GameRepository::joinRoom(const nlohmann::json &command) const
 		};
 	}
 
+	int playerCount = txn.query_value<int>(
+		R"(SELECT COUNT(*) FROM Player WHERE room_id = $1)",
+		pqxx::params{data.roomId}
+	);
+
+	std::string color;
+
+	switch (playerCount)
+	{
+		case 1:
+			color = "GREEN";
+			break;
+		case 2:
+			color = "BLUE";
+			break;
+		case 3:
+			color = "YELLOW";
+			break;
+		default:
+			return CommandResult{
+				{"error", "Room is full"}
+			};
+	}
+
 	pqxx::result player = txn.exec(
 		R"(
 			INSERT INTO Player (username, room_id, color)
-			VALUES ($1, $2, 'GREEN')
+			VALUES ($1, $2, $3)
 			RETURNING *
 		)",
-		pqxx::params{data.username, data.roomId}
+		pqxx::params{data.username, data.roomId, color}
 	);
 
 	txn.commit();
