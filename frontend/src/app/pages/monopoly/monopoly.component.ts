@@ -56,7 +56,7 @@ export class MonopolyComponent {
     {name: 'Chur Kornplatz', id: 1, price: 1200},
     {name: 'Kanzlei', id: 2, price: 0},
     {name: 'Schaffhausen Vordergasse', id: 3, price: 1200},
-    {name: 'Einkommenssteuer', id: 4, price: 0},
+    {name: 'Steuer', id: 4, price: 0},
     {name: 'Vereinigte Privatbahnen', id: 5, price: 2000},
     {name: 'Aarau Rathausplatz', id: 6, price: 2000},
     {name: 'Chance', id: 7, price: 0},
@@ -90,7 +90,7 @@ export class MonopolyComponent {
     {name: 'Vereinigte Schwebebahnen AG.', id: 35, price: 4000},
     {name: 'Chance', id: 36, price: 0},
     {name: 'Lausanne Place St-François', id: 37, price: 7000},
-    {name: 'Nachsteuer', id: 38, price: 0},
+    {name: 'Steuer', id: 38, price: 0},
     {name: 'Zürich Paradeplatz', id: 39, price: 8000}
   ];
   user: string = 'Player 1'
