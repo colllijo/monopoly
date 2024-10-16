@@ -43,7 +43,7 @@ crow::response GameController::handleCreateRoom(const crow::request &req) const
 	return execute(command);
 }
 
-crow::response GameController::handleJoinGame(const crow::request &req, const std::string &gameId) const
+crow::response GameController::handleJoinGame(const crow::request &req, const std::string &roomId) const
 {
 	nlohmann::json body;
 
@@ -52,7 +52,7 @@ crow::response GameController::handleJoinGame(const crow::request &req, const st
 
 	if (!body.contains("user")) return crow::response(400);
 
-	const std::shared_ptr<Command> command = std::make_shared<PlayerJoinRoom>(body["user"], gameId);
+	const std::shared_ptr<Command> command = std::make_shared<PlayerJoinRoom>(body["user"], roomId);
 
 	return execute(command);
 }

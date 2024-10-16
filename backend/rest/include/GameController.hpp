@@ -32,7 +32,7 @@ private:
 	// Route handler methods
 	crow::response handleGetGames() const;
 	crow::response handleCreateRoom(const crow::request &req) const;
-	crow::response handleJoinGame(const crow::request &req, const std::string &gameId) const;
+	crow::response handleJoinGame(const crow::request &req, const std::string &roomId) const;
 
 	crow::response execute(const std::shared_ptr<Command> &command) const;
 };

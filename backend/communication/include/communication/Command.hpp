@@ -50,7 +50,101 @@ namespace communication
 
 	namespace commands
 	{
-		//	PlayerJoinRoom
+		// TransferMoney
+		/*struct TransferMoneyData : public CommandData
+		{
+			std::string playerId;
+			std::string fieldId;
+
+			TransferMoneyData() = default;
+			TransferMoneyData(const std::string& playerId, const std::string& fieldId) : playerId(playerId), fieldId(fieldId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(TransferMoneyData, playerId, fieldId);
+		};
+
+		struct TransferMoney : public Command
+		{
+			TransferMoneyData data;
+
+			TransferMoney() : Command("TransferMoney", CommandQueue::GAME) {}
+			TransferMoney(const std::string& playerId, const std::string& fieldId) : Command("TransferMoney", CommandQueue::GAME), data(playerId, fieldId) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(TransferMoney, name, queue, data);
+		};*/
+
+		// MakeMoveGetNextPlayer
+		struct MakeMoveGetFieldData : public CommandData
+		{
+			std::string playerId;
+			int newPosition;
+
+			MakeMoveGetFieldData() = default;
+			MakeMoveGetFieldData(const std::string& playerId, const int& position) : playerId(playerId), newPosition(position) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetFieldData, playerId, newPosition);
+		};
+
+		struct MakeMoveGetField : public Command
+		{
+			MakeMoveGetFieldData data;
+
+			MakeMoveGetField() : Command("MakeMoveGetField", CommandQueue::GAME) {}
+			MakeMoveGetField(const std::string& playerId, const int& position) : Command("MakeMoveGetField", CommandQueue::GAME), data(playerId, position) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetField, name, queue, data);
+		};
+
+		// MakeMoveGetNextPlayer
+		struct MakeMoveGetNextPlayerData : public CommandData
+		{
+			std::string roomId;
+
+			MakeMoveGetNextPlayerData() = default;
+			MakeMoveGetNextPlayerData(const std::string& roomId) : roomId(roomId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetNextPlayerData, roomId);
+		};
+
+		struct MakeMoveGetNextPlayer : public Command
+		{
+			MakeMoveGetNextPlayerData data;
+
+			MakeMoveGetNextPlayer() : Command("MakeMoveGetNextPlayer", CommandQueue::GAME) {}
+			MakeMoveGetNextPlayer(const std::string& roomId) : Command("MakeMoveGetNextPlayer", CommandQueue::GAME), data(roomId) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetNextPlayer, name, queue, data);
+		};
+
+		// StartGame
+		struct StartGameData : public CommandData
+		{
+			std::string roomId;
+
+			StartGameData() = default;
+			StartGameData(const std::string& roomId) : roomId(roomId) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(StartGameData, roomId);
+		};
+
+		struct StartGame : public Command
+		{
+			StartGameData data;
+
+			StartGame() : Command("StartGame", CommandQueue::GAME) {}
+			StartGame(const std::string& roomId) : Command("StartGame", CommandQueue::GAME), data(roomId) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(StartGame, name, queue, data);
+		};
+
+		// PlayerJoinRoom
 		struct PlayerJoinRoomData : public CommandData
 		{
 			std::string username;

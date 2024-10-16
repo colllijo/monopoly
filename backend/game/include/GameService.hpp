@@ -24,5 +24,8 @@ private:
 
 	std::shared_ptr<CommunicationService> communication;
 
-	CommandResult playerJoinRoom(const nlohmann::json &command) const;
+	CommandResult playerJoinRoom(const nlohmann::json& command) const;
+	CommandResult startGame(const nlohmann::json& command) const;
+	CommandResult makeMove(const nlohmann::json& command) const;
+	// CommandResult transferMoney(const nlohmann::json& command) const;
 };
