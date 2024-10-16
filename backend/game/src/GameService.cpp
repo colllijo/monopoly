@@ -8,15 +8,19 @@ GameService::GameService(const std::shared_ptr<CommunicationService>& communicat
 }
 CommandResult GameService::playerJoinRoom(const nlohmann::json& command) const
 {
+	logger->info("PlayerJoinRoom command received");
+
 	const PlayerJoinRoomData data = static_cast<PlayerJoinRoom>(command).data;
 
 	const CommandResult result = communication->execute(std::make_shared<JoinRoom>(data.username, data.roomId));
+	logger->info("Player added to room");
 
 	const auto push = std::make_shared<Push>();
-	push->data.data = result;
-	push->data.receiver = result["room"]["id"];
+	push->data.message = result;
+	push->data.target = PushTarget::ROOM;
+	push->data.receiver = result["room"]["id"].get<std::string>();
 
-	communication->execute(push);
+	communication->executePush(push);
 
 	return result;
 }

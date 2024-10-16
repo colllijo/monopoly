@@ -146,7 +146,7 @@ void CommunicationService::stop()
 	logger->info("CommunicationService stopped");
 }
 
-void CommunicationService::registerCommandHandler(const Command &command, CommandCallback callback) { handlers[command] = callback; }
+void CommunicationService::registerCommandHandler(const Command &command, const CommandCallback& callback) { handlers[command] = callback; }
 
 CommandResult CommunicationService::execute(const std::shared_ptr<Command> &command)
 {
@@ -174,6 +174,19 @@ CommandResult CommunicationService::execute(const std::shared_ptr<Command> &comm
 	logger->info("Command timed out: {}", command->name);
 	removeCommand(correlationId);
 	return nullptr;
+}
+
+void CommunicationService::executePush(const std::shared_ptr<Command> &command)
+{
+	std::string correlationId = createCorrelationId();
+	std::string payload = command->toJson().dump();
+
+	AMQP::Envelope msg(payload.c_str(), payload.size());
+	msg.setReplyTo(responseQueue);
+	msg.setCorrelationID(correlationId);
+
+	logger->info("Sending command: {} to {}", command->toJson().dump(), communication::getQueuenName(command->queue));
+	channel->publish("", communication::getQueuenName(command->queue), msg);
 }
 
 void CommunicationService::removeCommand(const std::string &correlationId)

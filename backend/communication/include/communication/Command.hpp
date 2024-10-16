@@ -66,8 +66,8 @@ namespace communication
 		{
 			PlayerJoinRoomData data;
 
-			PlayerJoinRoom() : Command("JoinRoom", CommandQueue::GAME) {}
-			PlayerJoinRoom(const std::string& username, const std::string& roomId) : Command("JoinRoom", CommandQueue::GAME), data(username, roomId) {}
+			PlayerJoinRoom() : Command("PlayerJoinRoom", CommandQueue::GAME) {}
+			PlayerJoinRoom(const std::string& username, const std::string& roomId) : Command("PlayerJoinRoom", CommandQueue::GAME), data(username, roomId) {}
 
 			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
@@ -180,15 +180,22 @@ namespace communication
 
 		// WebSocket Commands
 		//	Push
+		enum class PushTarget
+		{
+			ROOM,
+			PLAYER,
+		};
+
 		struct PushData : public CommandData
 		{
 			std::string receiver;
-			json data;
+			PushTarget target;
+			json message;
 
 			PushData() = default;
-			PushData(const json& data) : data(data) {}
+			PushData(const std::string& receiver, const PushTarget& target, const json& message) : receiver(receiver), target(target), message(message) {}
 
-			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PushData, data);
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PushData, receiver, target, message);
 		};
 
 		struct Push : public Command
@@ -196,7 +203,7 @@ namespace communication
 			PushData data;
 
 			Push() : Command("Push", CommandQueue::PUSH) {}
-			Push(const json& data) : Command("Push", CommandQueue::PUSH), data(data) {}
+			Push(const std::string& receiver, const PushTarget& target, const json& message) : Command("Push", CommandQueue::PUSH), data(receiver, target, message) {}
 
 			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 

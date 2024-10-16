@@ -116,20 +116,33 @@ void Server::handleMessage(const std::shared_ptr<ix::WebSocket>& webSocket, cons
 
 CommandResult Server::push(const nlohmann::json& command) const
 {
-	PushData data = static_cast<Push>(command).data;
+	const PushData data = static_cast<Push>(command).data;
 
-	if (data.receiver.starts_with("game"))
-	{
-		for (const auto& player : rooms.at(data.receiver))
-		{
-			auto socket = connections.at(player);
-			socket->send(data.data.dump());
-		}
-	}
-	else
-	{
-		auto socket = connections.at(players.at(data.receiver));
-		socket->send(data.data.dump());
+	switch (data.target) {
+		case PushTarget::ROOM:
+			if (!rooms.contains(data.receiver))
+			{
+				logger->error("Room {} not found", data.receiver);
+				return CommandResult();
+			}
+
+			for (const auto& player : rooms.at(data.receiver))
+			{
+				auto socket = connections.at(player);
+				socket->send(data.message.dump());
+			}
+
+			break;
+		case PushTarget::PLAYER:
+			if (!players.contains(data.receiver))
+			{
+				logger->error("Player {} not found", data.receiver);
+				return CommandResult();
+			}
+
+			auto socket = connections.at(players.at(data.receiver));
+			socket->send(data.message.dump());
+			break;
 	}
 
 	return CommandResult();
