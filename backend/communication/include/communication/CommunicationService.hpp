@@ -57,6 +57,7 @@ public:
 	void stop();
 
 	CommandResult execute(const std::shared_ptr<Command>& command);
+	CommandResult execute(const nlohmann::json& command);
 	void executePush(const std::shared_ptr<Command>& command);
 	void registerCommandHandler(const Command& command, const CommandCallback& callback);
 

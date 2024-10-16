@@ -1,4 +1,4 @@
-import {Component, HostListener} from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import {MatList, MatListItem} from "@angular/material/list";
 import {MatFormField} from "@angular/material/form-field";
 import {MatCard} from "@angular/material/card";
@@ -8,6 +8,8 @@ import {MatButton} from "@angular/material/button";
 import {NgForOf} from "@angular/common";
 import {ClientService} from "../../service/client.service";
 import {Router, RouterLink} from "@angular/router";
+import { WebsocketService } from '../../service/websocket.service';
+import { GetRoomByPlayerId, GetRoomByPlayerIdResponse, JoinRoomResponse } from '../../model/commands';
 
 @Component({
   selector: 'app-lobby',
@@ -27,10 +29,34 @@ import {Router, RouterLink} from "@angular/router";
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.scss'
 })
-export class LobbyComponent {
+export class LobbyComponent implements OnInit {
   players: { name: string }[] = [];
+  playerCount: number = 1;
 
-  constructor(private clientSerivce: ClientService, private router: Router) {
+  constructor(private clientSerivce: ClientService, private router: Router, private websocketService: WebsocketService) {
+  }
+
+  ngOnInit(): void {
+    const getGame: GetRoomByPlayerId = {
+      name: 'GetRoomByPlayerId',
+      queue: 1,
+      data: {
+        playerId: sessionStorage.getItem('playerId') || ''
+      }
+    }
+
+    setTimeout(() => {
+      this.websocketService.sendMessage(getGame).subscribe((response) => {
+        this.playerCount = (response as GetRoomByPlayerIdResponse).players
+      });
+    }, 250);
+    this.websocketService.getMessages()?.subscribe((message) => {
+      console.log('Received message (Lobby):', message);
+
+      if (message.pushType === 'JoinRoom') {
+        this.playerCount = (message as JoinRoomResponse).room.players
+      }
+    });
   }
 
   startGame() {

@@ -15,7 +15,7 @@
     <mat-card class="game-list">
         <h2>Bestehende Spiele:</h2>
         <mat-list>
-            <mat-list-item *ngFor="let room of rooms" (click)="joinRoom(playerName, room.uuid, room.name)">
+            <mat-list-item *ngFor="let room of rooms" (click)="joinRoom(room.id, room.name)">
                 {{ room.name }} - Spieler: {{ room.players }}
             </mat-list-item>
         </mat-list>

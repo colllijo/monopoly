@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <mutex>
+
 #include "Command.hpp"
 
 CommunicationService::CommunicationService(const std::shared_ptr<Logger>& logger)
@@ -182,6 +183,34 @@ CommandResult CommunicationService::execute(const std::shared_ptr<Command> &comm
 	if (future.wait_for(std::chrono::seconds(8)) == std::future_status::ready) return future.get();
 
 	logger->info("Command timed out: {}", command->name);
+	removeCommand(correlationId);
+	return nullptr;
+}
+
+CommandResult CommunicationService::execute(const nlohmann::json &command)
+{
+	std::shared_ptr<CommandPromise> promise = std::make_shared<CommandPromise>();
+	std::future<CommandResult> future = promise->get_future();
+
+	std::string correlationId = createCorrelationId();
+
+	{
+		std::lock_guard<std::mutex> lock(requestsMutex);
+		requests[correlationId] = std::move(promise);
+	}
+
+	std::string payload = command.dump();
+
+	AMQP::Envelope msg(payload.c_str(), payload.size());
+	msg.setReplyTo(responseQueue);
+	msg.setCorrelationID(correlationId);
+
+	logger->info("Sending command: {} to {}", command.dump(), communication::getQueuenName(command["queue"]));
+	channel->publish("", communication::getQueuenName(command["queue"]), msg);
+
+	if (future.wait_for(std::chrono::seconds(8)) == std::future_status::ready) return future.get();
+
+	logger->info("Command timed out: {}", command["name"].get<std::string>());
 	removeCommand(correlationId);
 	return nullptr;
 }

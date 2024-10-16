@@ -103,10 +103,13 @@ void Server::handleMessage(const std::shared_ptr<ix::WebSocket>& webSocket, cons
 	else
 	{
 		logger->info("Executing command: {}", data.dump());
-		CommandResult result = communication->execute(std::make_shared<Command>(data));
+
+		std::string correlationId = data.value("correlationId", "");
+		CommandResult result = communication->execute(data);
 
 		if (!result.empty())
 		{
+			result["correlationId"] = correlationId;
 			logger->info("Sending response: {}", result.dump());
 			webSocket->send(result.dump());
 		}

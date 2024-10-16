@@ -48,7 +48,7 @@ CommandResult RoomRepository::getRoomByPlayerId(const nlohmann::json &command) c
 
     pqxx::result room = txn.exec(
         R"(
-            SELECT Room.id, Room.name, Room.state, COUNT(Player.id) as players 
+            SELECT Room.id, Room.name, Room.state
             FROM Room
             JOIN Player ON Room.id = Player.room_id
             WHERE Player.id = $1
@@ -64,11 +64,16 @@ CommandResult RoomRepository::getRoomByPlayerId(const nlohmann::json &command) c
         };
     }
 
+	int playerCount = txn.query_value<int>(
+		R"(SELECT COUNT(*) FROM Player WHERE room_id = $1)",
+		pqxx::params{room[0][0].as<std::string>()}
+	);
+
     return CommandResult {
         {"id", room[0][0].as<std::string>()},
         {"name", room[0][1].as<std::string>()},
         {"state", room[0][2].as<std::string>()},
-        {"players", room[0][3].as<int>()}
+        {"players", playerCount}
     };
 }
 
@@ -123,8 +128,11 @@ CommandResult RoomRepository::joinRoom(const nlohmann::json &command) const
 
 	pqxx::result room = txn.exec(
 		R"(
-			SELECT * FROM Room
-			WHERE id = $1
+            SELECT Room.id, Room.name, Room.state, COUNT(Player.id) as players 
+            FROM Room 
+            JOIN Player ON Room.id = Player.room_id 
+			WHERE Room.id = $1 
+            GROUP BY Room.id, Room.name, Room.state
 		)",
 		pqxx::params{data.roomId}
 	);
@@ -182,7 +190,8 @@ CommandResult RoomRepository::joinRoom(const nlohmann::json &command) const
 		{"room", {
 			{"id", room[0][0].as<std::string>()},
 			{"name", room[0][1].as<std::string>()},
-			{"state", room[0][2].as<std::string>()}
+			{"state", room[0][2].as<std::string>()},
+			{"players", room[0][3].as<int>() + 1}
 		}}
 	};
 }

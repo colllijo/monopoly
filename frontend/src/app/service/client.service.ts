@@ -1,8 +1,8 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {CreateRoom} from "../model/createRoom";
+import {CreateRoom, CreateRoomResponse, JoinRoom, JoinRoomResponse} from "../model/commands";
 import {Observable} from "rxjs";
-import {Rooms} from "../model/rooms";
+import {Room} from "../model/models";
 
 @Injectable({
   providedIn: 'root'
@@ -10,16 +10,16 @@ import {Rooms} from "../model/rooms";
 export class ClientService {
   private readonly httpClient = inject(HttpClient);
 
-  public getRooms(): Observable<Array<Rooms>> {
-    return this.httpClient.get<Array<Rooms>>('http://localhost:8080/games');
+  public getRooms(): Observable<Array<Room>> {
+    return this.httpClient.get<Array<Room>>('http://localhost:8080/games');
   }
 
-  public createRoom(createRoom: CreateRoom): Observable<Rooms> {
-    return this.httpClient.post<Rooms>('http://localhost:8080/games', JSON.stringify(createRoom));
+  public createRoom(createRoom: CreateRoom): Observable<CreateRoomResponse> {
+    return this.httpClient.post<CreateRoomResponse>('http://localhost:8080/games', JSON.stringify(createRoom));
   }
 
-  public joinRoom(user: string, gameId: string): Observable<Rooms> {
-    return this.httpClient.post<Rooms>('http://localhost:8080/games/' + gameId, JSON.stringify({user}));
+  public joinRoom(joinRoom: JoinRoom, gameId: string): Observable<JoinRoomResponse> {
+    return this.httpClient.post<JoinRoomResponse>('http://localhost:8080/games/' + gameId, JSON.stringify(joinRoom));
   }
 
   public leaveRoom(name: String) {

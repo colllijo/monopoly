@@ -2,7 +2,7 @@
 <div class="container">
   <mat-card>
     <h1>Warteraum</h1>
-    <h2>Spieler in der Lobby</h2>
+    <h2>{{playerCount}}/4  Spieler in der Lobby</h2>
 
     <mat-list>
       <mat-list-item *ngFor="let player of players">
@@ -10,7 +10,7 @@
       </mat-list-item>
     </mat-list>
 
-    <button mat-raised-button color="accent" (click)="startGame()" [disabled]="players.length < 2">Spiel starten</button>
+    <button mat-raised-button color="accent" (click)="startGame()" [disabled]="playerCount < 4">Spiel starten</button>
     <button mat-raised-button color="accent" (click)="leaveGame()">Lobby verlassen</button>
   </mat-card>
 </div>
