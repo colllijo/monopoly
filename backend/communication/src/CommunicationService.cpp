@@ -1,6 +1,7 @@
 #include "CommunicationService.hpp"
 
 #include <chrono>
+#include <cstdlib>
 #include <mutex>
 #include "Command.hpp"
 
@@ -81,7 +82,10 @@ void CommunicationService::declareQueue(const std::string_view &queueName)
 			                commandQueue.push({data, message.correlationID(), message.replyTo(), deliveryTag});
 		                })
 		            .onSuccess([this, queueName]() { logger->info("Listening on queue: {}", queueName); })
-		            .onError([this, queueName](const char *message) { logger->error("Failed to consume from queue {}: {}", queueName, message); });
+		            .onError([this, queueName](const char *message) {
+						logger->error("Failed to consume from queue {}: {}", queueName, message);
+						std::exit(1);
+					});
 	        });
 }
 
@@ -115,9 +119,15 @@ void CommunicationService::declareResponseQueue()
 			                messageQueue.push({std::string(message.body(), message.bodySize()), message.correlationID(), deliveryTag});
 		                })
 		            .onSuccess([this, name]() { logger->info("Listening on exclusive queue: {}", name); })
-		            .onError([this](const char *message) { logger->error("Failed to consume from exclusive queue: {}", message); });
+		            .onError([this](const char *message) {
+						logger->error("Failed to consume from exclusive queue: {}", message);
+						std::exit(1);
+					});
 	        })
-	    .onError([this](const char *message) { logger->error("Failed to create exclusive queue: {}", message); });
+	    .onError([this](const char *message) {
+			logger->error("Failed to create exclusive queue: {}", message);
+			std::exit(1);
+		});
 }
 
 void CommunicationService::start()
