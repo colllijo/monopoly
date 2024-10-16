@@ -22,4 +22,7 @@ export class ClientService {
     return this.httpClient.post<Rooms>('http://localhost:8080/games/' + gameId, JSON.stringify({user}));
   }
 
+  public leaveRoom(name: String) {
+    console.log('Spieler: ' + name + ' hat die Lobby verlassen')
+  }
 }

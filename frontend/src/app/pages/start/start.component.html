@@ -3,20 +3,20 @@
         <h1>Monopoly Game</h1>
 
         <div class="new-game">
-            <h2>Create a New Game</h2>
             <mat-form-field appearance="fill">
-                <mat-label>Your Name</mat-label>
-                <input matInput [(ngModel)]="playerName" placeholder="Enter your name">
+                <mat-label>Dein Name</mat-label>
+                <input matInput [(ngModel)]="playerName" placeholder="Namen eingeben">
             </mat-form-field>
-            <button mat-raised-button color="primary" (click)="createNewRoom()">Create Game</button>
+          <h2>Neues Spiel erstellen</h2>
+          <button mat-raised-button color="primary" (click)="createNewRoom()">Spiel erstellen</button>
         </div>
     </mat-card>
 
     <mat-card class="game-list">
-        <h2>Existing Games</h2>
+        <h2>Bestehende Spiele:</h2>
         <mat-list>
             <mat-list-item *ngFor="let room of rooms" (click)="joinRoom(playerName, room.uuid, room.name)">
-                {{ room.name }} - Players: {{ room.players }}
+                {{ room.name }} - Spieler: {{ room.players }}
             </mat-list-item>
         </mat-list>
     </mat-card>

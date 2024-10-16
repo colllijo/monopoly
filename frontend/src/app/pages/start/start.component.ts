@@ -35,9 +35,9 @@ export class StartComponent implements OnInit{
   joinRoom(user: string, gameId: string, name: string) {
     if (this.playerName) {
       this.clientService.joinRoom(user, gameId).subscribe()
-      this.router.navigate(['monopoly/' + name])
+      this.router.navigate(['lobby/' + name])
     } else {
-      alert('Please enter your name to join a game.');
+      alert('Gib deinen Namen ein bevor du einem Spiel beitritts');
     }
   }
 
@@ -54,7 +54,7 @@ export class StartComponent implements OnInit{
         }
       });
     } else {
-      alert('Please enter your name to create a game.');
+      alert('Gib deinen Namen ein bevor du ein neues Spiel erstellst.');
     }
   }
 

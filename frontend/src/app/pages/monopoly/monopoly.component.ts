@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, HostListener} from '@angular/core';
 import {Field} from "./field";
 import {MatButton} from "@angular/material/button";
 import {MatTooltip} from "@angular/material/tooltip";
+import {MatDialog} from "@angular/material/dialog";
+import {OverviewComponent} from "../../dialog/overview/overview.component";
 
 @Component({
   selector: 'app-monopoly',
@@ -15,6 +17,34 @@ import {MatTooltip} from "@angular/material/tooltip";
 })
 export class MonopolyComponent {
 
+  private dialogRef: any;
+
+  constructor(public dialog: MatDialog) {}
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (event.key === 'Tab' && !this.dialogRef) {
+      this.openDialog();
+    }
+  }
+
+  @HostListener('document:keyup', ['$event'])
+  handleKeyboardUpEvent(event: KeyboardEvent) {
+    if (event.key === 'Tab' && this.dialogRef) {
+      this.closeDialog();
+    }
+  }
+
+  openDialog(): void {
+    this.dialogRef = this.dialog.open(OverviewComponent);
+  }
+
+  closeDialog(): void {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+      this.dialogRef = null;
+    }
+  }
 
 
   getFieldById(id: number): Field | undefined {
