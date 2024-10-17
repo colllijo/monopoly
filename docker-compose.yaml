@@ -1,7 +1,12 @@
 name: monopoly
 services:
-  # web-service:
-  #   image: lighttpd
+  web-service:
+    restart: on-failure
+    build:
+      dockerfile: ./Dockerfile
+      context: ./frontend/
+    ports:
+      - 80:80
   websocket-service:
     restart: on-failure
     depends_on:
