@@ -12,35 +12,19 @@ export class WebsocketService implements OnDestroy {
 
   constructor() { }
 
-  connect(): void {
-    this.socket = new WebSocket(`ws://localhost:8008/${sessionStorage.getItem('playerId')}`);
+  ngOnDestroy() {
+    this.socket?.close();
+  }
 
-    this.socket.onopen = () => {
-      console.log('WebSocket connection established.');
-    };
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.socket = new WebSocket(`ws://localhost:8008/${sessionStorage.getItem('playerId')}`);
 
-    this.socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-
-      if (message.correlationId && this.pendingResponses[message.correlationId]) {
-        // Resolve the associated response
-        this.pendingResponses[message.correlationId].next(message);
-        this.pendingResponses[message.correlationId].complete();
-        delete this.pendingResponses[message.correlationId]; // Cleanup
-      } else {
-        // Handle messages without correlationId (pushType)
-        this.messageSubject.next(message);
-      }
-    };
-
-    this.socket.onclose = () => {
-      console.log('WebSocket connection closed.');
-      setTimeout(() => this.connect(), 1000);
-    };
-
-    this.socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+      this.socket.onopen = () => { resolve(); };
+      this.socket.onmessage = (event) => this.handleMessage(event);
+      this.socket.onclose = () => { setTimeout(() => this.connect(), 1000); };
+      this.socket.onerror = (error) => { console.error('WebSocket error:', error); };
+    });
   }
 
   sendMessage(message: any): Observable<any> {
@@ -66,7 +50,16 @@ export class WebsocketService implements OnDestroy {
     return this.messageSubject.asObservable();
   }
 
-  ngOnDestroy() {
-    this.socket?.close();
+  private handleMessage(event: MessageEvent<any>) {
+    const message = JSON.parse(event.data);
+
+    if (message.correlationId && this.pendingResponses[message.correlationId]) {
+      this.pendingResponses[message.correlationId].next(message);
+      this.pendingResponses[message.correlationId].complete();
+
+      delete this.pendingResponses[message.correlationId]; // Cleanup
+    } else {
+      this.messageSubject.next(message);
+    }
   }
 }

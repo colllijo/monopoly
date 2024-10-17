@@ -47,14 +47,10 @@ export class LobbyComponent implements OnInit {
       }
     }
 
-    setTimeout(() => {
-      this.websocketService.sendMessage(getGame).subscribe((response) => {
-        this.playerCount = (response as GetRoomByPlayerIdResponse).players
-      });
-    }, 250);
+    this.websocketService.sendMessage(getGame).subscribe((response) => {
+      this.playerCount = (response as GetRoomByPlayerIdResponse).players
+    });
     this.websocketService.getMessages()?.subscribe((message) => {
-      console.log('Received message (Lobby):', message);
-
       if (message.pushType === 'JoinRoom') {
         this.playerCount = (message as JoinRoomResponse).room.players
       }

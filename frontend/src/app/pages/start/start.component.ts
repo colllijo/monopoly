@@ -69,8 +69,9 @@ export class StartComponent implements OnInit {
       sessionStorage.setItem('roomId', res.room.id);
       sessionStorage.setItem('playerId', res.player.id);
 
-      this.websocketService.connect();
-      this.router.navigate(['lobby/' + name]);
+      this.websocketService.connect().then(() => {
+        this.router.navigate(['lobby/' + name]);
+      });
     });
   }
 
@@ -91,8 +92,9 @@ export class StartComponent implements OnInit {
           sessionStorage.setItem('roomId', res.room.id);
           sessionStorage.setItem('playerId', res.player.id);
 
-          this.websocketService.connect();
-          this.router.navigate(['lobby/' + res.room.name]);
+          this.websocketService.connect().then(() => {
+            this.router.navigate(['lobby/' + res.room.name]);
+          });
         });
       }
     });
