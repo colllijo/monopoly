@@ -7,6 +7,6 @@ export const routes: Routes = [
   { path: '', redirectTo: '/startseite', pathMatch: 'full' },
   { path: 'startseite', component: StartComponent, title: 'Startseite' },
   { path: 'lobby/:gameName', component: LobbyComponent, title: 'Lobby:/gameName' },
-  { path: 'monopoly/:gameName', component: MonopolyComponent, title: 'Monopoly' }
+  { path: 'monopoly', component: MonopolyComponent, title: 'Monopoly' }
 ]
 

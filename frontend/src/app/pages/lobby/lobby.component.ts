@@ -10,6 +10,7 @@ import {ClientService} from "../../service/client.service";
 import {Router, RouterLink} from "@angular/router";
 import { WebsocketService } from '../../service/websocket.service';
 import { GetRoomByPlayerId, GetRoomByPlayerIdResponse, JoinRoomResponse } from '../../model/commands';
+import {MatProgressSpinner} from "@angular/material/progress-spinner";
 
 @Component({
   selector: 'app-lobby',
@@ -24,7 +25,8 @@ import { GetRoomByPlayerId, GetRoomByPlayerIdResponse, JoinRoomResponse } from '
     MatInput,
     MatButton,
     NgForOf,
-    RouterLink
+    RouterLink,
+    MatProgressSpinner
   ],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.scss'
@@ -60,6 +62,7 @@ export class LobbyComponent implements OnInit {
   }
 
   startGame() {
+    this.router.navigate(['monopoly'])
     console.log('Game started with players:', this.players);
   }
 

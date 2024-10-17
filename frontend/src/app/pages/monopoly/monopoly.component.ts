@@ -93,5 +93,4 @@ export class MonopolyComponent {
     {name: 'Steuer', id: 38, price: 0},
     {name: 'Zürich Paradeplatz', id: 39, price: 8000}
   ];
-  user: string = 'Player 1'
 }
