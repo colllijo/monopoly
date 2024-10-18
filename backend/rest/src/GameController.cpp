@@ -34,7 +34,7 @@ crow::response GameController::handleCreateRoom(const crow::request &req) const
 	nlohmann::json body;
 
 	try { body = nlohmann::json::parse(req.body); }
-	catch (const nlohmann::json::parse_error &e) { return crow::response(400); }
+	catch (nlohmann::json::parse_error&) { return crow::response(400); }
 
 	if (!body.contains("name") || !body.contains("user")) return crow::response(400);
 
@@ -48,7 +48,7 @@ crow::response GameController::handleJoinGame(const crow::request &req, const st
 	nlohmann::json body;
 
 	try { body = nlohmann::json::parse(req.body); }
-	catch (const nlohmann::json::parse_error &e) { return crow::response(400); }
+	catch (nlohmann::json::parse_error&) { return crow::response(400); }
 
 	if (!body.contains("user")) return crow::response(400);
 

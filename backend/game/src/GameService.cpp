@@ -41,17 +41,18 @@ CommandResult GameService::playerStartTurn(const nlohmann::json& command) const
 
 	const PlayerStartTurnData data = static_cast<PlayerStartTurn>(command).data;
 
-	CommandResult game = communication->execute(std::make_shared<GetGameByRoomId>(data.roomId));
+	const CommandResult game = communication->execute(std::make_shared<GetGameByRoomId>(data.roomId));
 
 	if (game["currentPlayer"] != data.playerId) return CommandResult();
+	delete game;
 
 	CommandResult player = communication->execute(std::make_shared<GetPlayerById>(data.playerId));
-	int position = player["position"];
+	const int position = player["position"];
 
 	std::random_device rd;
 	std::uniform_int_distribution<int> dist(1, 6);
 
-	int diceResult = dist(rd) + dist(rd);
+	const int diceResult = dist(rd) + dist(rd);
 
 	if (position + diceResult > 39) player["money"] += 2000;
 	player["position"] = (position + diceResult) % 40;
