@@ -21,8 +21,4 @@ export class ClientService {
   public joinRoom(joinRoom: JoinRoom, gameId: string): Observable<JoinRoomResponse> {
     return this.httpClient.post<JoinRoomResponse>('http://localhost:8080/games/' + gameId, JSON.stringify(joinRoom));
   }
-
-  public leaveRoom(name: String) {
-    console.log('Spieler: ' + name + ' hat die Lobby verlassen')
-  }
 }

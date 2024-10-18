@@ -3,7 +3,7 @@ export interface Room {
   name: string;
   state: string;
   players: number;
-}
+};
 
 export interface Player {
   id: string;
@@ -11,4 +11,11 @@ export interface Player {
   color: string;
   position: number;
   money: number;
-}
+};
+
+export interface Game {
+	id: string;
+	roomId: string;
+	currentPlayer: string;
+	round: number;
+};

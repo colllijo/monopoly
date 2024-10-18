@@ -27,16 +27,22 @@ export class WebsocketService implements OnDestroy {
     });
   }
 
-  sendMessage(message: any): Observable<any> {
+  sendMessage(message: any) {
+    console.log('Sending message:', message);
+
+    this.socket?.send(JSON.stringify(message));
+  }
+
+  sendCommand(message: any): Observable<any> {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) { return of(); }
 
-    console.log('Sending message:', message);
 
     const correlationId = uuidv4();
     const messageWithCorrelationId = {
       ...message,
       correlationId: correlationId,
     };
+    console.log('Sending message:', messageWithCorrelationId);
 
     const responseSubject = new Subject<any>();
     this.pendingResponses[correlationId] = responseSubject;

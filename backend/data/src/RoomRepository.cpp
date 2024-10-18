@@ -1,4 +1,5 @@
 #include "RoomRepository.hpp"
+
 #include <functional>
 
 #include "communication/Command.hpp"
@@ -9,6 +10,9 @@ RoomRepository::RoomRepository(const std::shared_ptr<CommunicationService> &comm
 {
 	communication->registerCommandHandler(GetRooms(), std::bind(&RoomRepository::getRooms, this, std::placeholders::_1));
 	communication->registerCommandHandler(GetRoomByPlayerId(), std::bind(&RoomRepository::getRoomByPlayerId, this, std::placeholders::_1));
+	communication->registerCommandHandler(GetPlayersByRoomId(), std::bind(&RoomRepository::getPlayersByRoomId, this, std::placeholders::_1));
+	communication->registerCommandHandler(GetPlayerById(), std::bind(&RoomRepository::getPlayerById, this, std::placeholders::_1));
+	communication->registerCommandHandler(UpdatePlayer(), std::bind(&RoomRepository::updatePlayer, this, std::placeholders::_1));
 	communication->registerCommandHandler(CreateRoom(), std::bind(&RoomRepository::createRoom, this, std::placeholders::_1));
 	communication->registerCommandHandler(JoinRoom(), std::bind(&RoomRepository::joinRoom, this, std::placeholders::_1));
 }
@@ -42,7 +46,7 @@ CommandResult RoomRepository::getRooms(const nlohmann::json &) const
 
 CommandResult RoomRepository::getRoomByPlayerId(const nlohmann::json &command) const
 {
-	GetRoomByPlayerIdData data = static_cast<GetRoomByPlayerId>(command).data;
+	const GetRoomByPlayerIdData data = static_cast<GetRoomByPlayerId>(command).data;
 
 	auto txn = database->getTransaction();
 
@@ -77,9 +81,99 @@ CommandResult RoomRepository::getRoomByPlayerId(const nlohmann::json &command) c
     };
 }
 
+CommandResult RoomRepository::getPlayersByRoomId(const nlohmann::json &command) const
+{
+	logger->info("Received Command GetPlayersByRoomId");
+
+	const GetPlayersByRoomIdData data = static_cast<GetPlayersByRoomId>(command).data;
+
+	auto txn = database->getTransaction();
+
+	pqxx::result players = txn.exec(
+		R"(
+			SELECT * FROM Player
+			WHERE room_id = $1
+		)",
+		pqxx::params{data.roomId}
+	);
+
+	txn.commit();
+
+	nlohmann::json result = nlohmann::json::array();
+
+	for (const auto &player : players)
+	{
+		result.push_back({
+			{"id", player[0].as<std::string>()},
+			{"username", player[1].as<std::string>()},
+			{"color", player[3].as<std::string>()},
+			{"money", player[4].as<int>()},
+			{"position", player[5].as<int>()}
+		});
+	}
+
+	return CommandResult{
+		{"players", result}
+	};
+}
+
+CommandResult RoomRepository::getPlayerById(const nlohmann::json &command) const
+{
+	logger->info("Received Command GetPlayerById");
+
+	const GetPlayerByIdData data = static_cast<GetPlayerById>(command).data;
+
+	auto txn = database->getTransaction();
+
+	pqxx::result player = txn.exec(
+		R"(
+			SELECT * FROM Player
+			WHERE id = $1
+		)",
+		pqxx::params{data.playerId}
+	);
+
+	return CommandResult {
+		{"id", player[0][0].as<std::string>()},
+		{"username", player[0][1].as<std::string>()},
+		{"color", player[0][3].as<std::string>()},
+		{"money", player[0][4].as<int>()},
+		{"position", player[0][5].as<int>()}
+	};
+}
+
+CommandResult RoomRepository::updatePlayer(const nlohmann::json &command) const
+{
+	logger->info("Received Command UpdatePlayer");
+
+	const UpdatePlayerData data = static_cast<UpdatePlayer>(command).data;
+
+	auto txn = database->getTransaction();
+
+	pqxx::result player = txn.exec(
+		R"(
+			UPDATE Player
+			SET position = $1, money = $2
+			WHERE id = $3
+			RETURNING *
+		)",
+		pqxx::params{data.position, data.money, data.id}
+	);
+
+	txn.commit();
+
+	return CommandResult {
+		{"id", player[0][0].as<std::string>()},
+		{"username", player[0][1].as<std::string>()},
+		{"color", player[0][3].as<std::string>()},
+		{"money", player[0][4].as<int>()},
+		{"position", player[0][5].as<int>()}
+	};
+}
+
 CommandResult RoomRepository::createRoom(const nlohmann::json &command) const
 {
-	CreateRoomData data = static_cast<CreateRoom>(command).data;
+	const CreateRoomData data = static_cast<CreateRoom>(command).data;
 
 	auto txn = database->getTransaction();
 
@@ -122,7 +216,7 @@ CommandResult RoomRepository::createRoom(const nlohmann::json &command) const
 CommandResult RoomRepository::joinRoom(const nlohmann::json &command) const
 {
 	logger->info("Joining room: {}", command.dump());
-	JoinRoomData data = static_cast<JoinRoom>(command).data;
+	const JoinRoomData data = static_cast<JoinRoom>(command).data;
 
 	auto txn = database->getTransaction();
 

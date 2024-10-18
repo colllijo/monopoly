@@ -3,19 +3,18 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 
+#include "Database.hpp"
 #include "communication/Command.hpp"
 #include "communication/CommunicationService.hpp"
-#include "communication/Logger.hpp"
 
 using communication::Command;
 using communication::CommandResult;
 
 using namespace communication::commands;
 
-class GameService
-{
+class GameRepository {
 public:
-	GameService(const std::shared_ptr<CommunicationService>& communication);
+	GameRepository(const std::shared_ptr<CommunicationService> &communication, const std::shared_ptr<Database> &database);
 
 	void setLogger(const std::shared_ptr<Logger>& logger) { this->logger = logger; }
 
@@ -23,9 +22,9 @@ private:
 	std::shared_ptr<Logger> logger;
 
 	std::shared_ptr<CommunicationService> communication;
+	std::shared_ptr<Database> database;
 
-	CommandResult playerJoinRoom(const nlohmann::json& command) const;
-	CommandResult startGame(const nlohmann::json& command) const;
-	CommandResult playerStartTurn(const nlohmann::json& command) const;
-	CommandResult playerEndTurn(const nlohmann::json& command) const;
+	CommandResult startGame(const nlohmann::json&) const;
+	CommandResult getGameByRoomId(const nlohmann::json&) const;
+	CommandResult gameUpdateTurn(const nlohmann::json&) const;
 };

@@ -3,6 +3,7 @@
 
 #include "Database.hpp"
 #include "RoomRepository.hpp"
+#include "GameRepository.hpp"
 #include "communication/CommunicationService.hpp"
 #include "communication/SpdLogger.hpp"
 
@@ -20,7 +21,9 @@ int main()
 
 	// Declare handlers
 	RoomRepository roomRepository(communicationService, database);
+	GameRepository gameRepository(communicationService, database);
 	roomRepository.setLogger(logger);
+	gameRepository.setLogger(logger);
 
 	// Initialize DB schema
 	if (!database->isDataInitialized()) return 1;

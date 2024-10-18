@@ -97,24 +97,18 @@ void Server::handleMessage(const std::shared_ptr<ix::WebSocket>& webSocket, cons
 
 	nlohmann::json data = nlohmann::json::parse(message->str);
 
-	if (data.value("type", "") == "response")
-	{
-	}
-	else
-	{
-		logger->info("Executing command: {}", data.dump());
+	logger->info("Executing command: {}", data.dump());
 
-		std::string correlationId = data.value("correlationId", "");
-		CommandResult result = communication->execute(data);
+	std::string correlationId = data.value("correlationId", "");
+	CommandResult result = communication->execute(data);
 
-		if (!result.empty())
-		{
-			result["correlationId"] = correlationId;
-			logger->info("Sending response: {}", result.dump());
-			webSocket->send(result.dump());
-		}
-		else { logger->info("No response to send"); }
+	if (!result.empty())
+	{
+		result["correlationId"] = correlationId;
+		logger->info("Sending response: {}", result.dump());
+		webSocket->send(result.dump());
 	}
+	else { logger->info("No response to send"); }
 }
 
 CommandResult Server::push(const nlohmann::json& command) const

@@ -42,6 +42,7 @@ import { WebsocketService } from '../../service/websocket.service';
 export class StartComponent implements OnInit {
   playerName: string = '';
   rooms: Array<Room> = new Array<Room>();
+  openRooms: Array<Room> = new Array<Room>();
 
   constructor(
     public dialog: MatDialog,
@@ -55,6 +56,10 @@ export class StartComponent implements OnInit {
   ngOnInit(): void {
     this.clientService.getRooms().subscribe((obj) => {
       this.rooms = obj;
+      this.openRooms = this.rooms.filter((room) => room.state === 'LOBBY' && room.players < 4);
+
+      console.log(this.rooms);
+      console.log(this.openRooms);
     });
   }
 

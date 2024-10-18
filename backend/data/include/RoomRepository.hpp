@@ -26,6 +26,9 @@ private:
 
 	CommandResult getRooms(const nlohmann::json&) const;
 	CommandResult getRoomByPlayerId(const nlohmann::json&) const;
+	CommandResult getPlayersByRoomId(const nlohmann::json&) const;
+	CommandResult getPlayerById(const nlohmann::json&) const;
+	CommandResult updatePlayer(const nlohmann::json&) const;
 	CommandResult createRoom(const nlohmann::json& command) const;
 	CommandResult joinRoom(const nlohmann::json& command) const;
 };
