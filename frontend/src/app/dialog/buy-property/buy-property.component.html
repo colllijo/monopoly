@@ -1,0 +1,9 @@
+<h1 mat-dialog-title>Möchten sie das Feld kaufen?</h1>
+<div mat-dialog-content>
+  <h2>{{ data.name }}</h2>
+  <p>Preis: {{ data.price }} CHF</p>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close="decline" color="warn">Ablehnen</button>
+  <button mat-button mat-dialog-close="buy" color="primary">Kaufen</button>
+</div>

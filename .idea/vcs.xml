@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/AMQP-CPP" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/Crow" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/IXWebSocket" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/json" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/libevent" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/libpqxx" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/libuuid-cmake" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/backend/external/spdlog" vcs="Git" />
+  </component>
+</project>

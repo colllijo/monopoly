@@ -1,0 +1,8 @@
+BasedOnStyle: Google
+UseTab: ForIndentation
+IndentWidth: 4
+TabWidth: 4
+NamespaceIndentation: All
+BreakBeforeBraces: Allman
+AccessModifierOffset: -4
+ColumnLimit: 180

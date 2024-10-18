@@ -1,0 +1,4 @@
+.cache/
+build/
+/backend/cmake-build-debug/
+/.idea/

@@ -1,0 +1,321 @@
+<div>
+  @for (player of players; track player.id) {
+    <p style="background-color: {{ player.color }}">
+      {{ player.username }}: Auf dem Feld
+      {{ getFieldById(player.position)?.name }} ({{ player.position }}), Geld:
+      {{ player.money }}
+    </p>
+  }
+</div>
+<div class="table">
+  <div class="board">
+    <div class="center">
+      <h1 class="title">MONOPOLY</h1>
+    </div>
+
+    <div class="space corner go">
+      <div class="container">
+        <div class="instructions">Nimm 2000$</div>
+        <div class="go-word">{{ getFieldById(0)?.name }}</div>
+      </div>
+      <div class="arrow fa fa-long-arrow-left"></div>
+    </div>
+
+    <div class="row horizontal-row bottom-row">
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar light-blue"></div>
+          <div class="name">{{ getFieldById(9)?.name }} (9)</div>
+          <div class="price">Preis $ {{ getFieldById(9)?.price }}</div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar light-blue"></div>
+          <div class="name">{{ getFieldById(8)?.name }} (8)</div>
+          <div class="price">Preis $ {{ getFieldById(8)?.price }}</div>
+        </div>
+      </div>
+      <div class="space chance">
+        <div class="container">
+          <div class="name">{{ getFieldById(7)?.name }} (7)</div>
+          <i class="drawing fa fa-question"></i>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar light-blue"></div>
+          <div class="name">{{ getFieldById(6)?.name }} (6)</div>
+          <div class="price">Preis $ {{ getFieldById(6)?.price }}</div>
+        </div>
+      </div>
+      <div class="space railroad">
+        <div class="container">
+          <div class="name">{{ getFieldById(5)?.name }} (5)</div>
+          <i class="drawing fa fa-subway"></i>
+          <div class="price"></div>
+        </div>
+      </div>
+      <div class="space fee income-tax">
+        <div class="container">
+          <div class="name">{{ getFieldById(4)?.name }} (4)</div>
+          <div class="instructions"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar dark-purple"></div>
+          <div class="name">{{ getFieldById(3)?.name }} (3)</div>
+          <div class="price">Preis $ {{ getFieldById(3)?.price }}</div>
+        </div>
+      </div>
+      <div class="space community-chest">
+        <div class="container">
+          <div class="name">{{ getFieldById(2)?.name }} (2)</div>
+          <i class="drawing fa fa-cube"></i>
+          <div class="instructions"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar dark-purple"></div>
+          <div class="name three-line-name">
+            {{ getFieldById(1)?.name }} (1)
+          </div>
+          <div class="price">Preis $ {{ getFieldById(1)?.price }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space corner jail">
+      <div class="just"></div>
+      <div class="drawing">
+        <div class="container">
+          <div class="name"></div>
+          <div class="window">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <i class="person fa fa-frown-o"></i>
+          </div>
+          <div class="name">{{ getFieldById(10)?.name }} (10)</div>
+        </div>
+      </div>
+      <div class="visiting"></div>
+    </div>
+
+    <div class="row vertical-row left-row">
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar orange"></div>
+          <div class="name">{{ getFieldById(19)?.name }} (19)</div>
+          <div class="price">Preis $ {{ getFieldById(19)?.price }}</div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar orange"></div>
+          <div class="name">{{ getFieldById(18)?.name }} (18)</div>
+          <div class="price">Preis $ {{ getFieldById(18)?.price }}</div>
+        </div>
+      </div>
+      <div class="space community-chest">
+        <div class="container">
+          <div class="name">{{ getFieldById(17)?.name }} (17)</div>
+          <i class="drawing fa fa-cube"></i>
+          <div class="instructions"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar orange"></div>
+          <div class="name">{{ getFieldById(16)?.name }} ()16</div>
+          <div class="price">Preis $ {{ getFieldById(16)?.price }}</div>
+        </div>
+      </div>
+      <div class="space railroad">
+        <div class="container">
+          <div class="name long-name">{{ getFieldById(15)?.name }} (15)</div>
+          <i class="drawing fa fa-subway"></i>
+          <div class="price"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar purple"></div>
+          <div class="name">{{ getFieldById(14)?.name }} (14)</div>
+          <div class="price">Preis $ {{ getFieldById(14)?.price }}</div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar purple"></div>
+          <div class="name">{{ getFieldById(13)?.name }} (13)</div>
+          <div class="price">Preis $ {{ getFieldById(13)?.price }}</div>
+        </div>
+      </div>
+      <div class="space utility electric-company">
+        <div class="container">
+          <div class="name">{{ getFieldById(12)?.name }} (12)</div>
+          <i class="drawing fa fa-lightbulb-o"></i>
+          <div class="price"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar purple"></div>
+          <div class="name">{{ getFieldById(11)?.name }} (11)</div>
+          <div class="price">Preis $ {{ getFieldById(11)?.price }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space corner free-parking">
+      <div class="container">
+        <div class="name">{{ getFieldById(20)?.name }} (20)</div>
+        <i class="drawing fa fa-car"></i>
+        <div class="name"></div>
+      </div>
+    </div>
+
+    <div class="row horizontal-row top-row">
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar red"></div>
+          <div class="name">{{ getFieldById(21)?.name }} (21)</div>
+          <div class="price">Preis $ {{ getFieldById(21)?.price }}</div>
+        </div>
+      </div>
+      <div class="space chance">
+        <div class="container">
+          <div class="name">{{ getFieldById(22)?.name }} (22)</div>
+          <i class="drawing fa fa-question blue"></i>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar red"></div>
+          <div class="name">{{ getFieldById(23)?.name }} (23)</div>
+          <div class="price">Preis $ {{ getFieldById(23)?.price }}</div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar red"></div>
+          <div class="name">{{ getFieldById(24)?.name }} (24)</div>
+          <div class="price">Preis $ {{ getFieldById(24)?.price }}</div>
+        </div>
+      </div>
+      <div class="space railroad">
+        <div class="container">
+          <div class="name">{{ getFieldById(25)?.name }} (25)</div>
+          <i class="drawing fa fa-subway"></i>
+          <div class="price"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar yellow"></div>
+          <div class="name">{{ getFieldById(26)?.name }} (26)</div>
+          <div class="price">Preis $ {{ getFieldById(26)?.price }}</div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar yellow"></div>
+          <div class="name">{{ getFieldById(27)?.name }} (27)</div>
+          <div class="price">Preis $ {{ getFieldById(27)?.price }}</div>
+        </div>
+      </div>
+      <div class="space utility waterworks">
+        <div class="container">
+          <div class="name">{{ getFieldById(28)?.name }} (28)</div>
+          <i class="drawing fa fa-tint"></i>
+          <div class="price"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar yellow"></div>
+          <div class="name">{{ getFieldById(29)?.name }} (29)</div>
+          <div class="price">Preis $ {{ getFieldById(29)?.price }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space corner go-to-jail">
+      <div class="container">
+        <div class="name">{{ getFieldById(30)?.name }} (30)</div>
+        <i class="drawing fa fa-gavel"></i>
+        <div class="name"></div>
+      </div>
+    </div>
+
+    <div class="row vertical-row right-row">
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar green"></div>
+          <div class="name">{{ getFieldById(31)?.name }} (31)</div>
+          <div class="price">Preis $ {{ getFieldById(31)?.price }}</div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar green"></div>
+          <div class="name three-line-name">
+            {{ getFieldById(32)?.name }} (32)
+          </div>
+          <div class="price">Preis $ {{ getFieldById(32)?.price }}</div>
+        </div>
+      </div>
+      <div class="space community-chest">
+        <div class="container">
+          <div class="name">{{ getFieldById(33)?.name }} (33)</div>
+          <i class="drawing fa fa-cube"></i>
+          <div class="instructions"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar green"></div>
+          <div class="name long-name">{{ getFieldById(34)?.name }} (34)</div>
+          <div class="price">Preis $ {{ getFieldById(34)?.price }}</div>
+        </div>
+      </div>
+      <div class="space railroad">
+        <div class="container">
+          <div class="name">{{ getFieldById(35)?.name }} (35)</div>
+          <i class="drawing fa fa-subway"></i>
+          <div class="price"></div>
+        </div>
+      </div>
+      <div class="space chance">
+        <div class="container">
+          <div class="name">{{ getFieldById(36)?.name }} (36)</div>
+          <i class="drawing fa fa-question"></i>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar dark-blue"></div>
+          <div class="name">{{ getFieldById(37)?.name }} (37)</div>
+          <div class="price">Preis $ {{ getFieldById(37)?.price }}</div>
+        </div>
+      </div>
+      <div class="space fee luxury-tax">
+        <div class="container">
+          <div class="name">{{ getFieldById(38)?.name }} (38)</div>
+          <div class="drawing fa fa-diamond"></div>
+          <div class="instructions"></div>
+        </div>
+      </div>
+      <div class="space property">
+        <div class="container">
+          <div class="color-bar dark-blue"></div>
+          <div class="name">{{ getFieldById(39)?.name }} (39)</div>
+          <div class="price">Preis $ {{ getFieldById(39)?.price }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

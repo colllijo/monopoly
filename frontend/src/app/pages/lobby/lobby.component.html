@@ -1,0 +1,9 @@
+<div class="container">
+  <mat-card>
+    <h1>Warteraum</h1>
+    <h2>{{playerCount}}/4  Spieler in der Lobby</h2>
+
+    <button mat-raised-button color="accent" (click)="startGame()" [disabled]="playerCount < 4">Spiel starten</button>
+    <button mat-raised-button color="accent" (click)="leaveGame()">Lobby verlassen</button>
+  </mat-card>
+</div>
