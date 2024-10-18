@@ -176,7 +176,7 @@ export class MonopolyComponent implements OnInit {
     { name: 'Bern Spitalgasse', id: 34, price: 6400 },
     { name: 'Vereinigte Schwebebahnen AG.', id: 35, price: 4000 },
     { name: 'Chance', id: 36, price: 0 },
-    { name: 'Lausanne Place St-François', id: 37, price: 7000 },
+    { name: 'Lausanne', id: 37, price: 7000 },
     { name: 'Steuer', id: 38, price: 0 },
     { name: 'Zürich Paradeplatz', id: 39, price: 8000 },
   ];
