@@ -50,172 +50,176 @@ namespace communication
 
 	namespace commands
 	{
-		// TransferMoney
-		/*struct TransferMoneyData : public CommandData
+
+		// GetFieldByPosition
+		struct BuyFieldData : public CommandData
 		{
+			std::string gameId;
 			std::string playerId;
 			std::string fieldId;
 
-			TransferMoneyData() = default;
-			TransferMoneyData(const std::string& playerId, const std::string& fieldId) : playerId(playerId), fieldId(fieldId) {}
+			BuyFieldData() = default;
+			BuyFieldData(const std::string& gameId, const std::string& playerId, const std::string& fieldId) : gameId(gameId), playerId(playerId), fieldId(fieldId) {}
 
-			NLOHMANN_DEFINE_TYPE_INTRUSIVE(TransferMoneyData, playerId, fieldId);
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(BuyFieldData, gameId, playerId, fieldId);
 		};
 
-		struct TransferMoney : public Command
+		struct BuyField : public Command
 		{
-			TransferMoneyData data;
+			BuyFieldData data;
 
-			TransferMoney() : Command("TransferMoney", CommandQueue::GAME) {}
-			TransferMoney(const std::string& playerId, const std::string& fieldId) : Command("TransferMoney", CommandQueue::GAME), data(playerId, fieldId) {}
+			BuyField() : Command("BuyField", CommandQueue::DATA){};
+			BuyField(const std::string& gameId, const std::string& playerId, const std::string& fieldId)
+			    : Command("BuyField", CommandQueue::DATA), data(gameId, playerId, fieldId){};
 
 			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-			NLOHMANN_DEFINE_TYPE_INTRUSIVE(TransferMoney, name, queue, data);
-		};*/
-
-		// MakeMoveGetNextPlayer
-		struct MakeMoveGetFieldData : public CommandData
-		{
-			std::string playerId;
-			int newPosition;
-
-			MakeMoveGetFieldData() = default;
-			MakeMoveGetFieldData(const std::string& playerId, const int& position) : playerId(playerId), newPosition(position) {}
-
-			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetFieldData, playerId, newPosition);
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(BuyField, name, queue, data);
 		};
 
-		struct MakeMoveGetField : public Command
-		{
-			MakeMoveGetFieldData data;
-
-			MakeMoveGetField() : Command("MakeMoveGetField", CommandQueue::GAME) {}
-			MakeMoveGetField(const std::string& playerId, const int& position) : Command("MakeMoveGetField", CommandQueue::GAME), data(playerId, position) {}
-
-			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
-
-			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetField, name, queue, data);
-		};
-
-		// MakeMoveGetNextPlayer
-		struct MakeMoveGetNextPlayerData : public CommandData
+		// GetFieldByPosition
+		struct PlayerBuyFieldData : public CommandData
 		{
 			std::string roomId;
+			std::string playerId;
 
-			MakeMoveGetNextPlayerData() = default;
-			MakeMoveGetNextPlayerData(const std::string& roomId) : roomId(roomId) {}
+			PlayerBuyFieldData() = default;
+			PlayerBuyFieldData(const std::string& roomId, const std::string& playerId) : roomId(roomId), playerId(playerId) {}
 
-			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetNextPlayerData, roomId);
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerBuyFieldData, roomId, playerId);
 		};
 
-		struct MakeMoveGetNextPlayer : public Command
+		struct PlayerBuyField : public Command
 		{
-			MakeMoveGetNextPlayerData data;
+			PlayerBuyFieldData data;
 
-			MakeMoveGetNextPlayer() : Command("MakeMoveGetNextPlayer", CommandQueue::GAME) {}
-			MakeMoveGetNextPlayer(const std::string& roomId) : Command("MakeMoveGetNextPlayer", CommandQueue::GAME), data(roomId) {}
+			PlayerBuyField() : Command("PlayerBuyField", CommandQueue::GAME){};
+			PlayerBuyField(const std::string& gameId, const int& position) : Command("PlayerBuyField", CommandQueue::GAME), data(gameId, position) {}
 
 			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-			NLOHMANN_DEFINE_TYPE_INTRUSIVE(MakeMoveGetNextPlayer, name, queue, data);
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerBuyField, name, queue, data);
 		};
 
-        // PlayerStartTurn
-        struct PlayerStartTurnData : public CommandData
-        {
-            std::string roomId;
-            std::string playerId;
+		// GetFieldByPosition
+		struct GetFieldByPositionData : public CommandData
+		{
+			std::string gameId;
+			int position;
 
-            PlayerStartTurnData() = default;
-            PlayerStartTurnData(const std::string& roomId, const std::string& playerId) : roomId(roomId), playerId(playerId) {}
+			GetFieldByPositionData() = default;
+			GetFieldByPositionData(const std::string& gameId, const int& position) : gameId(gameId), position(position) {}
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerStartTurnData, roomId, playerId);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetFieldByPositionData, gameId, position);
+		};
 
-        struct PlayerStartTurn : public Command
-        {
-            PlayerStartTurnData data;
+		struct GetFieldByPosition : public Command
+		{
+			GetFieldByPositionData data;
 
-            PlayerStartTurn() : Command("PlayerStartTurn", CommandQueue::GAME) {}
-            PlayerStartTurn(const std::string& roomId, const std::string& playerId) : Command("PlayerStartTurn", CommandQueue::GAME), data(roomId, playerId) {}
+			GetFieldByPosition() : Command("GetFieldByPosition", CommandQueue::DATA){};
+			GetFieldByPosition(const std::string& gameId, const int& position) : Command("GetFieldByPosition", CommandQueue::DATA), data(gameId, position) {}
 
-            json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerStartTurn, name, queue, data);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetFieldByPosition, name, queue, data);
+		};
 
-        // PlayerEndTurn
-        struct PlayerEndTurnData : public CommandData
-        {
-            std::string playerId;
-            std::string roomId;
+		// PlayerStartTurn
+		struct PlayerStartTurnData : public CommandData
+		{
+			std::string roomId;
+			std::string playerId;
 
-            PlayerEndTurnData() = default;
-            PlayerEndTurnData(const std::string& playerId, const std::string& roomId) : playerId(playerId), roomId(roomId) {}
+			PlayerStartTurnData() = default;
+			PlayerStartTurnData(const std::string& roomId, const std::string& playerId) : roomId(roomId), playerId(playerId) {}
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerEndTurnData, playerId, roomId);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerStartTurnData, roomId, playerId);
+		};
 
-        struct PlayerEndTurn : public Command
-        {
-            PlayerEndTurnData data;
+		struct PlayerStartTurn : public Command
+		{
+			PlayerStartTurnData data;
 
-            PlayerEndTurn() : Command("PlayerEndTurn", CommandQueue::GAME) {}
-            PlayerEndTurn(const std::string& playerId, const std::string& roomId) : Command("PlayerEndTurn", CommandQueue::GAME), data(playerId, roomId) {}
+			PlayerStartTurn() : Command("PlayerStartTurn", CommandQueue::GAME) {}
+			PlayerStartTurn(const std::string& roomId, const std::string& playerId) : Command("PlayerStartTurn", CommandQueue::GAME), data(roomId, playerId) {}
 
-            json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerEndTurn, name, queue, data);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerStartTurn, name, queue, data);
+		};
 
-        // GetPlayerById
-        struct GetPlayerByIdData : public CommandData
-        {
-            std::string playerId;
+		// PlayerEndTurn
+		struct PlayerEndTurnData : public CommandData
+		{
+			std::string playerId;
+			std::string roomId;
 
-            GetPlayerByIdData() = default;
-            GetPlayerByIdData(const std::string& playerId) : playerId(playerId) {}
+			PlayerEndTurnData() = default;
+			PlayerEndTurnData(const std::string& playerId, const std::string& roomId) : playerId(playerId), roomId(roomId) {}
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayerByIdData, playerId);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerEndTurnData, playerId, roomId);
+		};
 
-        struct GetPlayerById : public Command
-        {
-            GetPlayerByIdData data;
+		struct PlayerEndTurn : public Command
+		{
+			PlayerEndTurnData data;
 
-            GetPlayerById() : Command("GetPlayerById", CommandQueue::DATA) {}
-            GetPlayerById(const std::string& playerId) : Command("GetPlayerById", CommandQueue::DATA), data(playerId) {}
+			PlayerEndTurn() : Command("PlayerEndTurn", CommandQueue::GAME) {}
+			PlayerEndTurn(const std::string& playerId, const std::string& roomId) : Command("PlayerEndTurn", CommandQueue::GAME), data(playerId, roomId) {}
 
-            json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayerById, name, queue, data);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerEndTurn, name, queue, data);
+		};
 
-        // UpdatePlayer
-        struct UpdatePlayerData : public CommandData
-        {
-            std::string id;
-            int position;
-            int money;
+		// GetPlayerById
+		struct GetPlayerByIdData : public CommandData
+		{
+			std::string playerId;
 
-            UpdatePlayerData() = default;
-            UpdatePlayerData(const std::string& id, int position, int money) : id(id), position(position), money(money) {}
+			GetPlayerByIdData() = default;
+			GetPlayerByIdData(const std::string& playerId) : playerId(playerId) {}
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(UpdatePlayerData, id, position, money);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayerByIdData, playerId);
+		};
 
-        struct UpdatePlayer : public Command
-        {
-            UpdatePlayerData data;
+		struct GetPlayerById : public Command
+		{
+			GetPlayerByIdData data;
 
-            UpdatePlayer() : Command("UpdatePlayer", CommandQueue::DATA) {}
-            UpdatePlayer(const std::string& id, int position, int money) : Command("UpdatePlayer", CommandQueue::DATA), data(id, position, money) {}
+			GetPlayerById() : Command("GetPlayerById", CommandQueue::DATA) {}
+			GetPlayerById(const std::string& playerId) : Command("GetPlayerById", CommandQueue::DATA), data(playerId) {}
 
-            json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(UpdatePlayer, name, queue, data);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayerById, name, queue, data);
+		};
+
+		// UpdatePlayer
+		struct UpdatePlayerData : public CommandData
+		{
+			std::string id;
+			int position;
+			int money;
+
+			UpdatePlayerData() = default;
+			UpdatePlayerData(const std::string& id, int position, int money) : id(id), position(position), money(money) {}
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(UpdatePlayerData, id, position, money);
+		};
+
+		struct UpdatePlayer : public Command
+		{
+			UpdatePlayerData data;
+
+			UpdatePlayer() : Command("UpdatePlayer", CommandQueue::DATA) {}
+			UpdatePlayer(const std::string& id, int position, int money) : Command("UpdatePlayer", CommandQueue::DATA), data(id, position, money) {}
+
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(UpdatePlayer, name, queue, data);
+		};
 
 		// StartGame
 		struct StartGameData : public CommandData
@@ -240,74 +244,74 @@ namespace communication
 			NLOHMANN_DEFINE_TYPE_INTRUSIVE(StartGame, name, queue, data);
 		};
 
-        // GetGameByRoomId
-        struct GetGameByRoomIdData : public CommandData
-        {
-            std::string roomId;
+		// GetGameByRoomId
+		struct GetGameByRoomIdData : public CommandData
+		{
+			std::string roomId;
 
-            GetGameByRoomIdData() = default;
-            GetGameByRoomIdData(const std::string& roomId) : roomId(roomId) {}
+			GetGameByRoomIdData() = default;
+			GetGameByRoomIdData(const std::string& roomId) : roomId(roomId) {}
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetGameByRoomIdData, roomId);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetGameByRoomIdData, roomId);
+		};
 
-        struct GetGameByRoomId : public Command
-        {
-            GetGameByRoomIdData data;
+		struct GetGameByRoomId : public Command
+		{
+			GetGameByRoomIdData data;
 
-            GetGameByRoomId() : Command("GetGameByRoomId", CommandQueue::DATA) {}
-            GetGameByRoomId(const std::string& roomId) : Command("GetGameByRoomId", CommandQueue::DATA), data(roomId) {}
+			GetGameByRoomId() : Command("GetGameByRoomId", CommandQueue::DATA) {}
+			GetGameByRoomId(const std::string& roomId) : Command("GetGameByRoomId", CommandQueue::DATA), data(roomId) {}
 
-            json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetGameByRoomId, name, queue, data);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetGameByRoomId, name, queue, data);
+		};
 
-        // GameUpdateTurn
-        struct GameUpdateTurnData : public CommandData
-        {
-            std::string roomId;
+		// GameUpdateTurn
+		struct GameUpdateTurnData : public CommandData
+		{
+			std::string roomId;
 
-            GameUpdateTurnData() = default;
-            GameUpdateTurnData(const std::string& roomId) : roomId(roomId) {}
+			GameUpdateTurnData() = default;
+			GameUpdateTurnData(const std::string& roomId) : roomId(roomId) {}
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameUpdateTurnData, roomId);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameUpdateTurnData, roomId);
+		};
 
-        struct GameUpdateTurn : public Command
-        {
-            GameUpdateTurnData data;
+		struct GameUpdateTurn : public Command
+		{
+			GameUpdateTurnData data;
 
-            GameUpdateTurn() : Command("GameUpdateTurn", CommandQueue::DATA) {}
-            GameUpdateTurn(const std::string& roomId) : Command("GameUpdateTurn", CommandQueue::DATA), data(roomId) {}
+			GameUpdateTurn() : Command("GameUpdateTurn", CommandQueue::DATA) {}
+			GameUpdateTurn(const std::string& roomId) : Command("GameUpdateTurn", CommandQueue::DATA), data(roomId) {}
 
-            json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameUpdateTurn, name, queue, data);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameUpdateTurn, name, queue, data);
+		};
 
-        // GetPlayersByRoomId
-        struct GetPlayersByRoomIdData : public CommandData
-        {
-            std::string roomId;
+		// GetPlayersByRoomId
+		struct GetPlayersByRoomIdData : public CommandData
+		{
+			std::string roomId;
 
-            GetPlayersByRoomIdData() = default;
-            GetPlayersByRoomIdData(const std::string& roomId) : roomId(roomId) {}
+			GetPlayersByRoomIdData() = default;
+			GetPlayersByRoomIdData(const std::string& roomId) : roomId(roomId) {}
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayersByRoomIdData, roomId);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayersByRoomIdData, roomId);
+		};
 
-        struct GetPlayersByRoomId : public Command
-        {
-            GetPlayersByRoomIdData data;
+		struct GetPlayersByRoomId : public Command
+		{
+			GetPlayersByRoomIdData data;
 
-            GetPlayersByRoomId() : Command("GetPlayersByRoomId", CommandQueue::DATA) {}
-            GetPlayersByRoomId(const std::string& roomId) : Command("GetPlayersByRoomId", CommandQueue::DATA), data(roomId) {}
+			GetPlayersByRoomId() : Command("GetPlayersByRoomId", CommandQueue::DATA) {}
+			GetPlayersByRoomId(const std::string& roomId) : Command("GetPlayersByRoomId", CommandQueue::DATA), data(roomId) {}
 
-            json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
+			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayersByRoomId, name, queue, data);
-        };
+			NLOHMANN_DEFINE_TYPE_INTRUSIVE(GetPlayersByRoomId, name, queue, data);
+		};
 
 		// PlayerJoinRoom
 		struct PlayerJoinRoomData : public CommandData

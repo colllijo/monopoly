@@ -24,7 +24,9 @@ private:
 	std::shared_ptr<CommunicationService> communication;
 	std::shared_ptr<Database> database;
 
-	CommandResult startGame(const nlohmann::json&) const;
-	CommandResult getGameByRoomId(const nlohmann::json&) const;
-	CommandResult gameUpdateTurn(const nlohmann::json&) const;
+	CommandResult startGame(const nlohmann::json& command) const;
+	CommandResult getGameByRoomId(const nlohmann::json& command) const;
+	CommandResult gameUpdateTurn(const nlohmann::json& command) const;
+	CommandResult getFieldByPosition(const nlohmann::json& command) const;
+	CommandResult buyField(const nlohmann::json& command) const;
 };

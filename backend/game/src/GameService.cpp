@@ -11,6 +11,7 @@ GameService::GameService(const std::shared_ptr<CommunicationService>& communicat
 	communication->registerCommandHandler(PlayerJoinRoom(), std::bind(&GameService::playerJoinRoom, this, std::placeholders::_1));
 	communication->registerCommandHandler(PlayerStartTurn(), std::bind(&GameService::playerStartTurn, this, std::placeholders::_1));
 	communication->registerCommandHandler(PlayerEndTurn(), std::bind(&GameService::playerEndTurn, this, std::placeholders::_1));
+	communication->registerCommandHandler(PlayerBuyField(), std::bind(&GameService::playerBuyField, this, std::placeholders::_1));
 }
 
 CommandResult GameService::playerJoinRoom(const nlohmann::json& command) const
@@ -44,18 +45,32 @@ CommandResult GameService::playerStartTurn(const nlohmann::json& command) const
 	const CommandResult game = communication->execute(std::make_shared<GetGameByRoomId>(data.roomId));
 
 	if (game["currentPlayer"] != data.playerId) return CommandResult();
-	delete game;
 
 	CommandResult player = communication->execute(std::make_shared<GetPlayerById>(data.playerId));
-	const int position = player["position"];
+	int position = player["position"];
+	int money = player["money"];
 
 	std::random_device rd;
 	std::uniform_int_distribution<int> dist(1, 6);
 
 	const int diceResult = dist(rd) + dist(rd);
 
-	if (position + diceResult > 39) player["money"] += 2000;
-	player["position"] = (position + diceResult) % 40;
+	if (position + diceResult > 39) money += 2000;
+	position = (position + diceResult) % 40;
+
+	const CommandResult field = communication->execute(std::make_shared<GetFieldByPosition>(game["id"], position));
+	delete game;
+
+	const auto& ownerId = field["owner"];
+	if (!ownerId.empty() && ownerId != data.playerId)
+	{
+		money -= field["rent"].get<int>();
+		auto owner = communication->execute(std::make_shared<GetPlayerById>(ownerId));
+		communication->execute(std::make_shared<UpdatePlayer>(data.playerId, owner["position"], owner["money"].get<int>() + field["rent"].get<int>()));
+	}
+
+	player["position"] = position;
+	player["money"] = money;
 
 	communication->execute(std::make_shared<UpdatePlayer>(data.playerId, player["position"], player["money"]));
 
@@ -70,9 +85,7 @@ CommandResult GameService::playerStartTurn(const nlohmann::json& command) const
 	communication->executePush(push);
 
 	players.erase("pushType");
-	return CommandResult{
-		{"field", "Wünsch dir was"},
-	};
+	return field;
 }
 
 CommandResult GameService::playerEndTurn(const nlohmann::json& command) const
@@ -87,7 +100,7 @@ CommandResult GameService::playerEndTurn(const nlohmann::json& command) const
 
 	game = communication->execute(std::make_shared<GameUpdateTurn>(data.roomId));
 	game["pushType"] = "NextTurn";
-	
+
 	const auto push = std::make_shared<Push>();
 	push->data.message = game;
 	push->data.target = PushTarget::PLAYER;
@@ -97,4 +110,37 @@ CommandResult GameService::playerEndTurn(const nlohmann::json& command) const
 
 	game.erase("pushType");
 	return game;
+}
+
+CommandResult GameService::playerBuyField(const nlohmann::json& command) const
+{
+	logger->info("PlayerBuyField command received");
+
+	const PlayerBuyFieldData data = static_cast<PlayerBuyField>(command).data;
+
+	const CommandResult game = communication->execute(std::make_shared<GetGameByRoomId>(data.roomId));
+
+	if (game["currentPlayer"] != data.playerId) return CommandResult();
+	const CommandResult player = communication->execute(std::make_shared<GetPlayerById>(data.playerId));
+
+	CommandResult field = communication->execute(std::make_shared<GetFieldByPosition>(game["id"], player["position"]));
+
+	if (field["owner"].empty() && field["type"] == "PROPERTY")
+	{
+		field = communication->execute(std::make_shared<BuyField>(game["id"], data.playerId, field["id"]));
+
+		communication->execute(std::make_shared<UpdatePlayer>(data.playerId, player["position"], player["money"].get<int>() - field["cost"].get<int>()));
+	}
+
+	CommandResult players = communication->execute(std::make_shared<GetPlayersByRoomId>(data.roomId));
+	players["pushType"] = "Players";
+
+	const auto push = std::make_shared<Push>();
+	push->data.message = players;
+	push->data.target = PushTarget::ROOM;
+	push->data.receiver = data.roomId;
+
+	communication->executePush(push);
+
+	return field;
 }

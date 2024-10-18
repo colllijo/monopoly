@@ -28,4 +28,5 @@ private:
 	CommandResult startGame(const nlohmann::json& command) const;
 	CommandResult playerStartTurn(const nlohmann::json& command) const;
 	CommandResult playerEndTurn(const nlohmann::json& command) const;
+	CommandResult playerBuyField(const nlohmann::json& command) const;
 };
