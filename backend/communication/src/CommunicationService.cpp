@@ -180,7 +180,7 @@ CommandResult CommunicationService::execute(const std::shared_ptr<Command> &comm
 	logger->info("Sending command: {} to {}", command->toJson().dump(), communication::getQueuenName(command->queue));
 	channel->publish("", communication::getQueuenName(command->queue), msg);
 
-	if (future.wait_for(std::chrono::seconds(8)) == std::future_status::ready) return future.get();
+	if (future.wait_for(std::chrono::seconds(16)) == std::future_status::ready) return future.get();
 
 	logger->info("Command timed out: {}", command->name);
 	removeCommand(correlationId);
@@ -208,7 +208,7 @@ CommandResult CommunicationService::execute(const nlohmann::json &command)
 	logger->info("Sending command: {} to {}", command.dump(), communication::getQueuenName(command["queue"]));
 	channel->publish("", communication::getQueuenName(command["queue"]), msg);
 
-	if (future.wait_for(std::chrono::seconds(8)) == std::future_status::ready) return future.get();
+	if (future.wait_for(std::chrono::seconds(16)) == std::future_status::ready) return future.get();
 
 	logger->info("Command timed out: {}", command["name"].get<std::string>());
 	removeCommand(correlationId);

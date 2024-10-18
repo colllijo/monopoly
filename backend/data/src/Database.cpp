@@ -196,6 +196,8 @@ void Database::createProperties()
 				('Nachsteuer', 'TAX', 38, 0, 2000),
 				('Zürich Paradeplatz', 'PROPERTY', 39, 8000, 1000)
 		)");
+
+		txn.commit();
 	}
 	catch (const pqxx::sql_error &e) { logger->error("Failed to create properties: {}", e.what()); }
 }

@@ -17,7 +17,9 @@ import { MatDialogActions, MatDialogClose, MatDialogRef, MatDialogTitle } from '
 export class StartTurnComponent {
   constructor(
     public dialogRef: MatDialogRef<StartTurnComponent>,
-  ) {}
+  ) {
+    this.dialogRef.disableClose = true;
+  }
 
   onDiceRoll(): void {
     this.dialogRef.close();

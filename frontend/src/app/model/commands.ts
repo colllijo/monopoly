@@ -1,4 +1,4 @@
-import { Game, Room, Player } from './models';
+import { Field, Game, Room, Player } from './models';
 
 export interface CreateRoom {
   user: string;
@@ -70,7 +70,7 @@ export interface PlayerStartTurn {
   };
 };
 
-// TODO: PlayerStartTurnResponse
+export type PlayerStartTurnResponse = Field;
 
 export interface PlayerEndTurn {
   name: string;
@@ -82,3 +82,12 @@ export interface PlayerEndTurn {
 }
 
 export type PlayerEndTurnResponse = Game;
+
+export interface PlayerBuyField {
+  name: string;
+  queue: number;
+  data: {
+    playerId: string;
+    roomId: string;
+  };
+}

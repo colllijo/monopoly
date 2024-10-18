@@ -60,8 +60,6 @@ CommandResult GameRepository::startGame(const nlohmann::json& command) const
 
 	communication->executePush(push);
 
-	logger->warn("RoomId: {}", data.roomId);
-
 	return result;
 }
 
@@ -192,8 +190,13 @@ CommandResult GameRepository::getFieldByPosition(const nlohmann::json& command) 
 
 	const auto& fieldObj = field[0];
 
-	return CommandResult{{"name", fieldObj["name"].as<std::string>()}, {"type", fieldObj["type"].as<std::string>()}, {"position", fieldObj["position"].as<int>()},
-	                     {"cost", fieldObj["cost"].as<int>()},         {"rent", fieldObj["rent"].as<int>()},         {"owner", ownerId}};
+	return CommandResult{{"id", fieldObj["id"].as<std::string>()},
+	                     {"name", fieldObj["name"].as<std::string>()},
+	                     {"type", fieldObj["type"].as<std::string>()},
+	                     {"position", fieldObj["position"].as<int>()},
+	                     {"cost", fieldObj["cost"].as<int>()},
+	                     {"rent", fieldObj["rent"].as<int>()},
+	                     {"owner", ownerId}};
 }
 
 CommandResult GameRepository::buyField(const nlohmann::json& command) const

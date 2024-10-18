@@ -94,7 +94,7 @@ namespace communication
 			PlayerBuyFieldData data;
 
 			PlayerBuyField() : Command("PlayerBuyField", CommandQueue::GAME){};
-			PlayerBuyField(const std::string& gameId, const int& position) : Command("PlayerBuyField", CommandQueue::GAME), data(gameId, position) {}
+			PlayerBuyField(const std::string& roomId, const std::string& playerId) : Command("PlayerBuyField", CommandQueue::GAME), data(roomId, playerId) {}
 
 			json toJson() const override { return {{"name", name}, {"queue", queue}, {"data", data}}; }
 

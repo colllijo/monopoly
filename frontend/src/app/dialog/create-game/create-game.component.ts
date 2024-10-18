@@ -37,7 +37,9 @@ export class CreateGameComponent {
   constructor(
     public dialogRef: MatDialogRef<CreateGameComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+  ) {
+    this.dialogRef.disableClose = true;
+  }
 
   onCancel(): void {
     this.dialogRef.close();

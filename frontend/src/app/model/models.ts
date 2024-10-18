@@ -19,3 +19,12 @@ export interface Game {
 	currentPlayer: string;
 	round: number;
 };
+
+export interface Field {
+  name: string;
+  type: string;
+  position: number;
+  cost: number;
+  rent: number;
+  owner: string;
+}

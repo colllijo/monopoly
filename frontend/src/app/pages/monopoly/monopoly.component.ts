@@ -11,9 +11,11 @@ import {
   GetPlayersByRoomIdResponse,
   PlayerEndTurn,
   PlayerStartTurn,
+  PlayerStartTurnResponse,
 } from '../../model/commands';
 import { Player } from '../../model/models';
 import { StartTurnComponent } from '../../dialog/start-turn/start-turn.component';
+import { BuyPropertyComponent } from '../../dialog/buy-property/buy-property.component';
 
 @Component({
   selector: 'app-monopoly',
@@ -91,10 +93,7 @@ export class MonopolyComponent implements OnInit {
       };
 
       console.log('Starting turn');
-      this.websocketService.sendCommand(playerStartTurn).subscribe(() => {
-        // TODO: Check if the player can buy the property
-
-        console.log('Ending turn');
+      this.websocketService.sendCommand(playerStartTurn).subscribe((field) => {
         const playerEndTurn: PlayerEndTurn = {
           name: 'PlayerEndTurn',
           queue: 0,
@@ -104,7 +103,36 @@ export class MonopolyComponent implements OnInit {
           },
         };
 
-        this.websocketService.sendMessage(playerEndTurn);
+        if ((field as PlayerStartTurnResponse).owner === '' && (field as PlayerStartTurnResponse).type === 'PROPERTY') {
+          const buyDialogRef = this.dialog.open(BuyPropertyComponent, {
+            data: {
+              name: (field as PlayerStartTurnResponse).name,
+              price: (field as PlayerStartTurnResponse).cost,
+            },
+            width: '250px',
+          });
+
+          buyDialogRef.afterClosed().subscribe((buy: boolean) => {
+            if (buy) {
+              const playerBuyProperty: PlayerStartTurn = {
+                name: 'PlayerBuyField',
+                queue: 1,
+                data: {
+                  playerId: sessionStorage.getItem('playerId') || '',
+                  roomId: sessionStorage.getItem('roomId') || '',
+                },
+              };
+
+              this.websocketService
+                .sendCommand(playerBuyProperty)
+                .subscribe(() => {
+                  this.websocketService.sendMessage(playerEndTurn);
+                });
+            }
+          });
+        } else {
+          this.websocketService.sendMessage(playerEndTurn);
+        }
       });
     });
   }

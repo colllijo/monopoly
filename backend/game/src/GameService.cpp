@@ -59,9 +59,8 @@ CommandResult GameService::playerStartTurn(const nlohmann::json& command) const
 	position = (position + diceResult) % 40;
 
 	const CommandResult field = communication->execute(std::make_shared<GetFieldByPosition>(game["id"], position));
-	delete game;
 
-	const auto& ownerId = field["owner"];
+	const auto& ownerId = field["owner"].get<std::string>();
 	if (!ownerId.empty() && ownerId != data.playerId)
 	{
 		money -= field["rent"].get<int>();
@@ -125,10 +124,9 @@ CommandResult GameService::playerBuyField(const nlohmann::json& command) const
 
 	CommandResult field = communication->execute(std::make_shared<GetFieldByPosition>(game["id"], player["position"]));
 
-	if (field["owner"].empty() && field["type"] == "PROPERTY")
+	if (field["owner"].get<std::string>().empty() && field["type"] == "PROPERTY")
 	{
 		field = communication->execute(std::make_shared<BuyField>(game["id"], data.playerId, field["id"]));
-
 		communication->execute(std::make_shared<UpdatePlayer>(data.playerId, player["position"], player["money"].get<int>() - field["cost"].get<int>()));
 	}
 

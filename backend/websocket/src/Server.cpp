@@ -115,6 +115,8 @@ CommandResult Server::push(const nlohmann::json& command) const
 {
 	const PushData data = static_cast<Push>(command).data;
 
+	logger->info("Pushing message: {}", data.message.dump());
+
 	switch (data.target) {
 		case PushTarget::ROOM:
 			if (!rooms.contains(data.receiver))
